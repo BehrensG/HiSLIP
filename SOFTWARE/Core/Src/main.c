@@ -331,7 +331,7 @@ void StartDefaultTask(void const * argument)
   MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
   osDelay(300);
-  hislip_ServerTask();
+  hislip_CreateTask();
   /* Infinite loop */
   for(;;)
   {

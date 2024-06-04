@@ -24,8 +24,6 @@
 
 typedef struct {
 	struct netconn* newconn;
-	struct netconn* conn;
-	u8_t accept;
 }hislip_netconn_t;
 
 typedef struct
@@ -41,9 +39,24 @@ typedef struct {
 	u16_t session_id;
 }hislip_instr_t;
 
+
+static u8_t sync_task_running = 0;
+static	u8_t async_task_runnig = 0;
+
+
+hislip_task_control_t hislip_task_control;
+
 TaskHandle_t hislip_handler;
 uint32_t hislip_buffer[HISLIP_THREAD_STACKSIZE];
 StaticTask_t hislip_control_block;
+
+TaskHandle_t hislip_sync_handler;
+uint32_t hislip_sync_buffer[HISLIP_THREAD_STACKSIZE];
+StaticTask_t hislip_sync_control_block;
+
+TaskHandle_t hislip_async_handler;
+uint32_t hislip_async_buffer[HISLIP_THREAD_STACKSIZE];
+StaticTask_t hislip_async_control_block;
 
 xQueueHandle hislip_queue;
 
@@ -234,7 +247,7 @@ static struct netconn*  hislip_Bind(u16_t port)
 	struct netconn* conn;
 	err_t err;
 
-	conn = netconn_new_with_callback(NETCONN_TCP, hislip_Callback);
+	conn = netconn_new(NETCONN_TCP);
 	err = netconn_bind(conn, IP_ADDR_ANY, port);
 	err = netconn_listen(conn);
 
@@ -310,9 +323,9 @@ static hislip_msg_type_t hislip_Recv(hislip_instr_t* hislip_instr)
 
 		netconn_close(hislip_instr->netconn.newconn);
 		netconn_delete(hislip_instr->netconn.newconn);
-		hislip_instr->netconn.accept = NETCONN_ACCEPT_OFF;
 
-		return MSG_UNKNOWN;
+
+		return HISLIP_CONN_ERR;
 	}
 
 	return (hislip_msg_type_t)hislip_msg.msg_type;
@@ -352,6 +365,103 @@ static void hislip_Init(hislip_instr_t* hislip_instr)
 	hislip_instr->netconn.accept = NETCONN_ACCEPT_OFF;
 }
 
+
+static void hislip_SyncTask(void  *arg)
+{
+	hislip_instr_t hislip_instr;
+	hislip_Init(&hislip_instr);
+
+	hislip_instr.netconn.newconn = (struct netconn*)arg;
+
+	for (;;)
+	{
+		switch(hislip_Recv(&hislip_instr))
+		{
+			case Initialize : hislip_Initialize(&hislip_instr);break;
+	//		case AsyncInitialize : hislip_AsyncInitialize(&hislip_instr); break;
+	//		case AsyncMaximumMessageSize : hislip_AsyncMaximumMessageSize(&hislip_instr);break;
+			case DataEnd : hislip_DataEnd(&hislip_instr); break;
+
+			case HISLIP_CONN_ERR :
+				{
+					sync_task_running = false;
+					vTaskDelete(NULL);
+				}; break;
+
+			default : vTaskDelay(pdMS_TO_TICKS(2)); break;
+		}
+		vTaskDelay(pdMS_TO_TICKS(2));
+	}
+
+}
+
+static void hislip_aSyncTask(void  *arg)
+{
+	hislip_instr_t hislip_instr;
+	hislip_Init(&hislip_instr);
+
+	hislip_instr.netconn.newconn = (struct netconn*)arg;
+
+	for (;;)
+	{
+		switch(hislip_Recv(&hislip_instr))
+		{
+		//	case Initialize : hislip_Initialize(&hislip_instr);break;
+			case AsyncInitialize : hislip_AsyncInitialize(&hislip_instr); break;
+			case AsyncMaximumMessageSize : hislip_AsyncMaximumMessageSize(&hislip_instr);break;
+			case DataEnd : hislip_DataEnd(&hislip_instr); break;
+
+			case HISLIP_CONN_ERR :
+				{
+					async_task_running = false;
+					vTaskDelete(NULL);
+				}; break;
+
+			default : vTaskDelay(pdMS_TO_TICKS(2)); break;
+		}
+		vTaskDelay(pdMS_TO_TICKS(2));
+	}
+
+}
+
+static void hislip_ServerTask(void const *argument)
+{
+	err_t err;
+	struct netconn* newconn;
+	struct netconn* conn = hislip_Bind(HISLIP_PORT);
+
+	for (;;)
+	{
+		err = netconn_accept(conn, &newconn);
+
+		if(ERR_OK == err)
+		{
+			if(!sync_task_running)
+			{
+				hislip_sync_handler = xTaskCreateStatic(hislip_SyncTask,"hislip_SyncTask",
+						HISLIP_THREAD_STACKSIZE, (void*)newconn, tskIDLE_PRIORITY + 2,
+						hislip_sync_buffer, &hislip_sync_control_block);
+
+				sync_task_running = true;
+
+			}
+
+			if(!async_task_running)
+			{
+				hislip_async_handler = xTaskCreateStatic(hislip_aSyncTask,"hislip_aSyncTask",
+						HISLIP_THREAD_STACKSIZE, (void*)newconn, tskIDLE_PRIORITY + 2,
+						hislip_async_buffer, &hislip_async_control_block);
+
+				async_task_running = true;
+			}
+		}
+
+	}
+}
+
+
+
+/*
 static void hislip_Task(void const *argument)
 {
 
@@ -381,13 +491,13 @@ static void hislip_Task(void const *argument)
 		}
 	}
 }
+*/
 
-void hislip_ServerTask(void)
+void hislip_CreateTask(void)
 {
 
-	hislip_handler = xTaskCreateStatic(hislip_Task,"hislip_Task",
+	hislip_handler = xTaskCreateStatic(hislip_ServerTask,"hislip_ServerTask",
 			HISLIP_THREAD_STACKSIZE, (void*)1, tskIDLE_PRIORITY + 2,
 			hislip_buffer, &hislip_control_block);
 
-	hislip_queue = xQueueCreate(1, sizeof(u32_t));
 }

@@ -127,7 +127,7 @@
 #define CHECKSUM_CHECK_ICMP6 0
 /*-----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
-#define LWIP_SO_RCVTIMEO	1
+#define LWIP_SO_RCVTIMEO	0
 #define MEMP_NUM_NETCONN    20
 
 /* USER CODE END 1 */

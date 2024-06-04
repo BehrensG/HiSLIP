@@ -93,7 +93,8 @@ typedef enum
 	AuthenticationStart = HISLIP_AUTHENTICATIONSTART,
 	AuthenticationExchange = HISLIP_AUTHENTICATIONEXCHANGE,
 	AuthenticationResult = HISLIP_AUTHENTICATIONRESULT,
-	MSG_UNKNOWN = 256
+	HISLIP_CONN_ERR = 256
+
 }hislip_msg_type_t;
 
 #define HISLIP_PROLOGUE									0x4853
@@ -123,6 +124,6 @@ typedef struct
 #pragma pack(pop)
 
 
-void hislip_ServerTask(void);
+void hislip_CreateTask(void);
 
 #endif /* HISLIP_INC_HISLIP_H_ */
