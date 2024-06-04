@@ -7,6 +7,7 @@
 
 
  #include <string.h>
+#include <stdbool.h>
 // #include "stddef.h"
 #include "cmsis_os.h"
 #include "udp.h"
@@ -14,6 +15,7 @@
 #include "def.h"
 
 #include "HiSLIP.h"
+#include "SCPI_Def.h"
 
 #define HISLIP_THREAD_STACKSIZE		2048
 #define HISLIP_PORT					4880
@@ -40,11 +42,8 @@ typedef struct {
 }hislip_instr_t;
 
 
-static u8_t sync_task_running = 0;
-static	u8_t async_task_runnig = 0;
+static	u8_t task_count = 0;
 
-
-hislip_task_control_t hislip_task_control;
 
 TaskHandle_t hislip_handler;
 uint32_t hislip_buffer[HISLIP_THREAD_STACKSIZE];
@@ -102,6 +101,47 @@ err_t hislip_DataEnd(hislip_instr_t* hislip_instr)
 {
 	err_t err = ERR_OK;
 
+	hislip_msg_t msg_rx;
+
+	char* buf;
+	char* end;
+
+	const char* ends[3] = {LINE_ENDING_CR, LINE_ENDING_LF, LINE_ENDING_CRLF};
+
+	msg_rx = hislip_MsgParser(hislip_instr);
+
+	buf = &hislip_instr->netbuf.data[sizeof(hislip_msg_t)];
+
+	for(u8_t i = 0; i < 3; i++)
+	{
+		end = strstr(buf, ends[i]);
+		if(NULL != end)
+		{
+			break;
+		}
+
+	}
+
+	if(NULL != end)
+	{
+		memcpy(end, SCPI_LINE_ENDING, strlen(SCPI_LINE_ENDING));
+	}
+	else
+	{
+		memcpy(buf + msg_rx.payload_len.lo, SCPI_LINE_ENDING, strlen(SCPI_LINE_ENDING));
+	}
+
+	SCPI_Input(&scpi_context, buf, msg_rx.payload_len.lo + strlen(SCPI_LINE_ENDING));
+
+
+	return err;
+}
+
+/*
+err_t hislip_DataEnd(hislip_instr_t* hislip_instr)
+{
+	err_t err = ERR_OK;
+
 	hislip_msg_t msg_rx, msg_tx;
 	payload_len_t max_msg_size;
 
@@ -132,6 +172,8 @@ err_t hislip_DataEnd(hislip_instr_t* hislip_instr)
 
 	return err;
 }
+*/
+
 
 err_t hislip_AsyncMaximumMessageSize(hislip_instr_t* hislip_instr)
 {
@@ -332,6 +374,7 @@ static hislip_msg_type_t hislip_Recv(hislip_instr_t* hislip_instr)
 
 }
 
+/*
 static err_t hislip_Accept(hislip_instr_t* hislip_instr)
 {
 	struct netconn *newconn;
@@ -359,10 +402,11 @@ static err_t hislip_Accept(hislip_instr_t* hislip_instr)
 
 	return err;
 }
+*/
 
 static void hislip_Init(hislip_instr_t* hislip_instr)
 {
-	hislip_instr->netconn.accept = NETCONN_ACCEPT_OFF;
+
 }
 
 
@@ -384,8 +428,13 @@ static void hislip_SyncTask(void  *arg)
 
 			case HISLIP_CONN_ERR :
 				{
-					sync_task_running = false;
+					if(task_count)
+					{
+						task_count--;
+					}
+
 					vTaskDelete(NULL);
+
 				}; break;
 
 			default : vTaskDelay(pdMS_TO_TICKS(2)); break;
@@ -413,8 +462,13 @@ static void hislip_aSyncTask(void  *arg)
 
 			case HISLIP_CONN_ERR :
 				{
-					async_task_running = false;
+					if(task_count)
+					{
+						task_count--;
+					}
+
 					vTaskDelete(NULL);
+
 				}; break;
 
 			default : vTaskDelay(pdMS_TO_TICKS(2)); break;
@@ -436,62 +490,28 @@ static void hislip_ServerTask(void const *argument)
 
 		if(ERR_OK == err)
 		{
-			if(!sync_task_running)
+			if(0 == task_count)
 			{
 				hislip_sync_handler = xTaskCreateStatic(hislip_SyncTask,"hislip_SyncTask",
 						HISLIP_THREAD_STACKSIZE, (void*)newconn, tskIDLE_PRIORITY + 2,
 						hislip_sync_buffer, &hislip_sync_control_block);
 
-				sync_task_running = true;
+				task_count++;
 
 			}
 
-			if(!async_task_running)
+			else if(1 == task_count)
 			{
 				hislip_async_handler = xTaskCreateStatic(hislip_aSyncTask,"hislip_aSyncTask",
 						HISLIP_THREAD_STACKSIZE, (void*)newconn, tskIDLE_PRIORITY + 2,
 						hislip_async_buffer, &hislip_async_control_block);
 
-				async_task_running = true;
+				task_count++;
 			}
 		}
 
 	}
 }
-
-
-
-/*
-static void hislip_Task(void const *argument)
-{
-
-	hislip_instr_t hislip_instr;
-	hislip_Init(&hislip_instr);
-
-	u32_t test;
-
-	hislip_instr.netconn.conn = hislip_Bind(HISLIP_PORT);
-
-	for (;;)
-	{
-		if(pdTRUE == xQueueReceive(hislip_queue, &test, portMAX_DELAY))
-		{
-			if(ERR_OK == hislip_Accept(&hislip_instr))
-			{
-				switch(hislip_Recv(&hislip_instr))
-				{
-					case Initialize : hislip_Initialize(&hislip_instr);break;
-					case AsyncInitialize : hislip_AsyncInitialize(&hislip_instr); break;
-					case AsyncMaximumMessageSize : hislip_AsyncMaximumMessageSize(&hislip_instr);break;
-					case DataEnd : hislip_DataEnd(&hislip_instr); break;
-					default : vTaskDelay(pdMS_TO_TICKS(2)); break;
-				}
-			}
-			vTaskDelay(pdMS_TO_TICKS(2));
-		}
-	}
-}
-*/
 
 void hislip_CreateTask(void)
 {

@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "HiSLIP.h"
+#include "SCPI_Def.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -331,7 +332,10 @@ void StartDefaultTask(void const * argument)
   MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
   osDelay(300);
+
   hislip_CreateTask();
+
+
   /* Infinite loop */
   for(;;)
   {
