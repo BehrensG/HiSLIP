@@ -46,6 +46,13 @@ static hislip_msg_t hislip_MsgParser(hislip_instr_t* hislip_instr);
 
 // ----------------------------------------------------------------------------
 
+
+static void hislip_Init(hislip_instr_t* hislip_instr)
+{
+	memset(hislip_instr->end, 0, sizeof(hislip_instr->end));
+}
+
+
 void hislip_htonl(hislip_msg_t* hislip_msg)
 {
 	hislip_msg->msg_param = htonl(hislip_msg->msg_param);
@@ -53,6 +60,7 @@ void hislip_htonl(hislip_msg_t* hislip_msg)
 	hislip_msg->payload_len.hi = htonl(hislip_msg->payload_len.hi);
 	hislip_msg->payload_len.lo = htonl(hislip_msg->payload_len.lo);
 }
+
 
 size_t hislip_SumSize(size_t* sizes, size_t len)
 {
@@ -78,11 +86,29 @@ void hislip_CopyMemory(char* destination, void** sources, size_t* sizes, uint32_
 
 // ----------------------------------------------------------------------------
 
+int8_t hislip_Trigger(hislip_instr_t* hislip_instr)
+{
+
+	hislip_msg_t msg_rx;
+
+	char scpi_trigger[] = "*TRG";
+	char scpi_data[6];
+
+	memset(scpi_data, 0, sizeof(scpi_data));
+
+	memcpy(scpi_data, scpi_trigger, strlen(scpi_trigger));
+	memcpy(scpi_data + strlen(scpi_trigger), SCPI_LINE_ENDING, strlen(SCPI_LINE_ENDING));
+
+	msg_rx = hislip_MsgParser(hislip_instr);
+
+	return SCPI_Input(&scpi_context, scpi_data, strlen(scpi_data));
+}
+
 
 int8_t hislip_DataEnd(hislip_instr_t* hislip_instr)
 {
 
-	hislip_msg_t msg_rx;
+	hislip_msg_t msg_rx, msg_tx;
 
 	char* buf;
 	char* end;
@@ -118,10 +144,23 @@ int8_t hislip_DataEnd(hislip_instr_t* hislip_instr)
 
 	memcpy(&hislip_instr->msg, &msg_rx, sizeof(msg_rx));
 
-	return SCPI_Input(&scpi_context, buf, msg_rx.payload_len.lo + strlen(SCPI_LINE_ENDING));
+	if(!strcmp(buf,"?")) // is it a query
+	{
+		return SCPI_Input(&scpi_context, buf, msg_rx.payload_len.lo + strlen(SCPI_LINE_ENDING));
+	}
+	else
+	{
+		msg_tx.prologue = HISLIP_PROLOGUE;
+		msg_tx.msg_type = HISLIP_DATAEND;
+		msg_tx.control_code = 0x00;
+		msg_tx.msg_param = msg_rx.msg_param;
+		msg_tx.payload_len.hi = 0;
+		msg_tx.payload_len.lo = 0;
+
+		SCPI_Input(&scpi_context, buf, msg_rx.payload_len.lo + strlen(SCPI_LINE_ENDING));
+		return netconn_write(hislip_instr->netconn.newconn, &msg_tx, sizeof(hislip_msg_t), NETCONN_NOFLAG);
+	}
 }
-
-
 
 
 int8_t hislip_AsyncMaximumMessageSize(hislip_instr_t* hislip_instr)
@@ -158,6 +197,7 @@ int8_t hislip_AsyncMaximumMessageSize(hislip_instr_t* hislip_instr)
 	return err;
 }
 
+
 int8_t hislip_AsyncInitialize(hislip_instr_t* hislip_instr)
 {
 	int8_t err = ERR_OK;
@@ -181,6 +221,33 @@ int8_t hislip_AsyncInitialize(hislip_instr_t* hislip_instr)
 
 	return err;
 }
+
+
+int8_t hislip_AsyncStatusQuery(hislip_instr_t* hislip_instr)
+{
+	int8_t err = ERR_OK;
+
+	hislip_msg_t msg_rx, msg_tx;
+
+	msg_rx = hislip_MsgParser(hislip_instr);
+
+
+	msg_tx.prologue = HISLIP_PROLOGUE;
+	msg_tx.msg_type = HISLIP_ASYNCSTATUSRESPONSE;
+	msg_tx.control_code = 0x00;
+	msg_tx.msg_param = 0x00000000;
+	msg_tx.payload_len.hi = 0;
+	msg_tx.payload_len.lo = 0;
+
+	hislip_htonl(&msg_tx);
+
+	vTaskDelay(pdMS_TO_TICKS(1));
+	err = netconn_write(hislip_instr->netconn.newconn, &msg_tx, sizeof(hislip_msg_t), NETCONN_NOFLAG);
+
+
+	return err;
+}
+
 
 int8_t hislip_Initialize(hislip_instr_t* hislip_instr)
 {
@@ -217,6 +284,30 @@ int8_t hislip_Initialize(hislip_instr_t* hislip_instr)
 	return err;
 }
 
+int8_t hislip_AsyncDeviceClear(hislip_instr_t* hislip_instr)
+{
+	int8_t err = ERR_OK;
+	hislip_msg_t msg_rx, msg_tx;
+
+	msg_rx = hislip_MsgParser(hislip_instr);
+
+	hislip_instr->session_id = msg_rx.msg_param;
+
+	msg_tx.prologue = HISLIP_PROLOGUE;
+	msg_tx.msg_type = HISLIP_ASYNCINITIALIZERESPONSE;
+	msg_tx.control_code = 0x00;
+	msg_tx.msg_param = 0x00000000;
+	msg_tx.payload_len.hi = 0;
+	msg_tx.payload_len.lo = 0;
+
+	hislip_htonl(&msg_tx);
+
+	vTaskDelay(pdMS_TO_TICKS(1));
+	err = netconn_write(hislip_instr->netconn.newconn, &msg_tx, sizeof(hislip_msg_t), NETCONN_NOFLAG);
+
+	return err;
+}
+
 // ----------------------------------------------------------------------------
 
 static void hislip_Callback(struct netconn *conn, enum netconn_evt even, uint16_t len)
@@ -231,6 +322,7 @@ static void hislip_Callback(struct netconn *conn, enum netconn_evt even, uint16_
 
 	}
 }
+
 
 static struct netconn*  hislip_Bind(uint16_t port)
 {
@@ -264,6 +356,7 @@ static hislip_msg_t hislip_MsgParser(hislip_instr_t* hislip_instr)
 
 	return hislip_msg;
 }
+
 
 static hislip_msg_type_t hislip_Recv(hislip_instr_t* hislip_instr)
 {
@@ -324,12 +417,6 @@ static hislip_msg_type_t hislip_Recv(hislip_instr_t* hislip_instr)
 }
 
 
-static void hislip_Init(hislip_instr_t* hislip_instr)
-{
-	memset(hislip_instr->end, 0, sizeof(hislip_instr->end));
-}
-
-
 static void hislip_SyncTask(void  *arg)
 {
 	hislip_instr_t hislip_instr;
@@ -355,6 +442,7 @@ static void hislip_SyncTask(void  *arg)
 	//		case AsyncInitialize : hislip_AsyncInitialize(&hislip_instr); break;
 	//		case AsyncMaximumMessageSize : hislip_AsyncMaximumMessageSize(&hislip_instr);break;
 			case DataEnd : hislip_DataEnd(&hislip_instr); break;
+			case Trigger : hislip_Trigger(&hislip_instr); break;
 
 			case HISLIP_CONN_ERR :
 				{
@@ -388,6 +476,8 @@ static void hislip_aSyncTask(void  *arg)
 		//	case Initialize : hislip_Initialize(&hislip_instr);break;
 			case AsyncInitialize : hislip_AsyncInitialize(&hislip_instr); break;
 			case AsyncMaximumMessageSize : hislip_AsyncMaximumMessageSize(&hislip_instr);break;
+			case AsyncStatusQuery : hislip_AsyncStatusQuery(&hislip_instr); break;
+			case AsyncDeviceClear : hislip_AsyncDeviceClear(&hislip_instr); break;
 			case DataEnd : hislip_DataEnd(&hislip_instr); break;
 
 			case HISLIP_CONN_ERR :
