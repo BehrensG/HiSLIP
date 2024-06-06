@@ -12,45 +12,52 @@
 #include "ip_addr.h"
 #include "err.h"
 
-#define HISLIP_INITIALIZE									(u8_t)0
-#define HISLIP_INITIALIZERESPONSE							(u8_t)1
-#define	HISLIP_FATALERROR									(u8_t)2
-#define	HISLIP_ERROR										(u8_t)3
-#define HISLIP_ASYNCLOCK									(u8_t)4
-#define HISLIP_ASYNCLOCKRESPONSE							(u8_t)5
-#define HISLIP_DATA											(u8_t)6
-#define HISLIP_DATAEND										(u8_t)7
-#define HISLIP_DEVICECLEARCOMPLETE							(u8_t)8
-#define HISLIP_DEVICECLEARACKNOWLEDGE						(u8_t)9
-#define HISLIP_ASYNCREMOTELOCALCONTROL						(u8_t)10
-#define HISLIP_ASYNCREMOTELOCALRESPONSE						(u8_t)11
-#define HISLIP_TRIGGER										(u8_t)12
-#define HISLIP_INTERRUPTED									(u8_t)13
-#define HISLIP_ASYNCINTERRUPTED								(u8_t)14
-#define HISLIP_ASYNCMAXIMUMMESSAGESIZE						(u8_t)15
-#define HISLIP_ASYNCMAXIMUMMESSAGESIZERESPONSE				(u8_t)16
-#define HISLIP_ASYNCINITIALIZE								(u8_t)17
-#define HISLIP_ASYNCINITIALIZERESPONSE						(u8_t)18
-#define HISLIP_ASYNCDEVICECLEAR								(u8_t)19
-#define HISLIP_ASYNCSERVICEREQUEST							(u8_t)20
-#define HISLIP_ASYNCSTATUSQUERY								(u8_t)21
-#define HISLIP_ASYNCSTATUSRESPONSE							(u8_t)22
-#define HISLIP_ASYNCDEVICECLEARACKNOWLEDGE					(u8_t)23
-#define HISLIP_ASYNCLOCKINFO								(u8_t)24
-#define HISLIP_ASYNCLOCKINFORESPONSE						(u8_t)25
-#define HISLIP_GETDESCRIPTORS								(u8_t)26
-#define HISLIP_GETDESCRIPTORSRESPONSE						(u8_t)27
-#define HISLIP_STARTTLS										(u8_t)28
-#define HISLIP_ASYNCSTARTTLS								(u8_t)29
-#define HISLIP_ASYNCSTARTTLSRESPONSE						(u8_t)30
-#define HISLIP_ENDTLS										(u8_t)31
-#define HISLIP_ASYNCENDTLS									(u8_t)32
-#define HISLIP_ASYNCENDTLSRESPONSE							(u8_t)33
-#define HISLIP_GETSASLMECHANISMLIST							(u8_t)34
-#define HISLIP_GETSASLMECHANISMLISTRESPONSE					(u8_t)35
-#define HISLIP_AUTHENTICATIONSTART							(u8_t)36
-#define HISLIP_AUTHENTICATIONEXCHANGE						(u8_t)37
-#define HISLIP_AUTHENTICATIONRESULT							(u8_t)38
+#define HISLIP_INITIALIZE									(uint8_t)0
+#define HISLIP_INITIALIZERESPONSE							(uint8_t)1
+#define	HISLIP_FATALERROR									(uint8_t)2
+#define	HISLIP_ERROR										(uint8_t)3
+#define HISLIP_ASYNCLOCK									(uint8_t)4
+#define HISLIP_ASYNCLOCKRESPONSE							(uint8_t)5
+#define HISLIP_DATA											(uint8_t)6
+#define HISLIP_DATAEND										(uint8_t)7
+#define HISLIP_DEVICECLEARCOMPLETE							(uint8_t)8
+#define HISLIP_DEVICECLEARACKNOWLEDGE						(uint8_t)9
+#define HISLIP_ASYNCREMOTELOCALCONTROL						(uint8_t)10
+#define HISLIP_ASYNCREMOTELOCALRESPONSE						(uint8_t)11
+#define HISLIP_TRIGGER										(uint8_t)12
+#define HISLIP_INTERRUPTED									(uint8_t)13
+#define HISLIP_ASYNCINTERRUPTED								(uint8_t)14
+#define HISLIP_ASYNCMAXIMUMMESSAGESIZE						(uint8_t)15
+#define HISLIP_ASYNCMAXIMUMMESSAGESIZERESPONSE				(uint8_t)16
+#define HISLIP_ASYNCINITIALIZE								(uint8_t)17
+#define HISLIP_ASYNCINITIALIZERESPONSE						(uint8_t)18
+#define HISLIP_ASYNCDEVICECLEAR								(uint8_t)19
+#define HISLIP_ASYNCSERVICEREQUEST							(uint8_t)20
+#define HISLIP_ASYNCSTATUSQUERY								(uint8_t)21
+#define HISLIP_ASYNCSTATUSRESPONSE							(uint8_t)22
+#define HISLIP_ASYNCDEVICECLEARACKNOWLEDGE					(uint8_t)23
+#define HISLIP_ASYNCLOCKINFO								(uint8_t)24
+#define HISLIP_ASYNCLOCKINFORESPONSE						(uint8_t)25
+#define HISLIP_GETDESCRIPTORS								(uint8_t)26
+#define HISLIP_GETDESCRIPTORSRESPONSE						(uint8_t)27
+#define HISLIP_STARTTLS										(uint8_t)28
+#define HISLIP_ASYNCSTARTTLS								(uint8_t)29
+#define HISLIP_ASYNCSTARTTLSRESPONSE						(uint8_t)30
+#define HISLIP_ENDTLS										(uint8_t)31
+#define HISLIP_ASYNCENDTLS									(uint8_t)32
+#define HISLIP_ASYNCENDTLSRESPONSE							(uint8_t)33
+#define HISLIP_GETSASLMECHANISMLIST							(uint8_t)34
+#define HISLIP_GETSASLMECHANISMLISTRESPONSE					(uint8_t)35
+#define HISLIP_AUTHENTICATIONSTART							(uint8_t)36
+#define HISLIP_AUTHENTICATIONEXCHANGE						(uint8_t)37
+#define HISLIP_AUTHENTICATIONRESULT							(uint8_t)38
+
+#define HISLIP_PROLOGUE									0x4853
+// TBD
+#define HISLIP_VENDOR_ID								0x1111
+#define HISLIP_MAX_DATA_SIZE							1024
+
+#define HISLIP_LINE_ENDING								"\n"
 
 typedef enum
 {
@@ -97,33 +104,46 @@ typedef enum
 
 }hislip_msg_type_t;
 
-#define HISLIP_PROLOGUE									0x4853
-
-// TBD
-#define HISLIP_VENDOR_ID								0x1111
-
-#define HISLIP_MAX_DATA_SIZE							1024
-
 #pragma pack(push, 1)
 
 typedef struct
 {
-	u32_t hi;
-	u32_t lo;
+	uint32_t hi;
+	uint32_t lo;
 }payload_len_t;
 
 typedef struct
 {
-	u16_t prologue;
-	u8_t msg_type;
-	u8_t control_code;
-	u32_t msg_param;
+	uint16_t prologue;
+	uint8_t msg_type;
+	uint8_t control_code;
+	uint32_t msg_param;
 	payload_len_t payload_len;
 }hislip_msg_t;
 
 #pragma pack(pop)
 
 
+typedef struct {
+	struct netconn* newconn;
+}hislip_netconn_t;
+
+typedef struct {
+	char data[sizeof(hislip_msg_t) + HISLIP_MAX_DATA_SIZE];
+	uint16_t len;
+}hislip_netbuf_t;
+
+
+typedef struct {
+	hislip_msg_t msg;
+	hislip_netbuf_t netbuf;
+	hislip_netconn_t netconn;
+	uint16_t session_id;
+	char end[2];
+}hislip_instr_t;
+
+
 void hislip_CreateTask(void);
+void hislip_htonl(hislip_msg_t* hislip_msg);
 
 #endif /* HISLIP_INC_HISLIP_H_ */

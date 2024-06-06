@@ -65,18 +65,24 @@ static scpi_result_t SCPI_Rst(scpi_t * context)
 static scpi_result_t SCPI_IdnQ(scpi_t * context)
 {
 	int32_t ptr = 0;
-	static char info[46] = {'\0'};
+	char info[128];
+	memset(info,0,128);
 
     for (uint8_t i = 0; i < 4; i++)
     {
         if (context->idn[i])
         {
-        	ptr += snprintf(info + ptr, sizeof(info) - ptr, "%s,", context->idn[i] );
+        	if(3 != i)
+        		ptr += snprintf(info + ptr, sizeof(info) - ptr, "%s,", context->idn[i] );
+        	else
+        	{
+        		ptr += snprintf(info + ptr, sizeof(info) - ptr, "%s", context->idn[i] );
+        	}
         }
-        else{}
+
     }
 
-    SCPI_ResultCharacters(context, info, 45);
+    SCPI_ResultCharacters(context, info, ptr);
     return SCPI_RES_OK;
 }
 

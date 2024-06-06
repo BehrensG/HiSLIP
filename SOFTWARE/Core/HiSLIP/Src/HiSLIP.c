@@ -24,24 +24,6 @@
 #define	NETCONN_ACCEPT_OFF			(u8_t)0
 
 
-typedef struct {
-	struct netconn* newconn;
-}hislip_netconn_t;
-
-typedef struct
-{
-	char data[HISLIP_MAX_DATA_SIZE + sizeof(hislip_msg_t)];
-	u16_t len;
-}hislip_netbuf_t;
-
-typedef struct {
-	hislip_msg_t msg;
-	hislip_netbuf_t netbuf;
-	hislip_netconn_t netconn;
-	u16_t session_id;
-}hislip_instr_t;
-
-
 static	u8_t task_count = 0;
 
 
@@ -64,7 +46,7 @@ static hislip_msg_t hislip_MsgParser(hislip_instr_t* hislip_instr);
 
 // ----------------------------------------------------------------------------
 
-static void hislip_htonl(hislip_msg_t* hislip_msg)
+void hislip_htonl(hislip_msg_t* hislip_msg)
 {
 	hislip_msg->msg_param = htonl(hislip_msg->msg_param);
 	hislip_msg->prologue = htons(hislip_msg->prologue);
@@ -84,10 +66,10 @@ size_t hislip_SumSize(size_t* sizes, size_t len)
 	return sum;
 }
 
-void hislip_CopyMemory(char* destination, void** sources, size_t* sizes, u32_t num_sources)
+void hislip_CopyMemory(char* destination, void** sources, size_t* sizes, uint32_t num_sources)
 {
     size_t offset = 0;
-    for (u32_t i = 0; i < num_sources; i++)
+    for (uint32_t i = 0; i < num_sources; i++)
     {
         memcpy(destination + offset, sources[i], sizes[i]);
         offset += sizes[i];
@@ -97,16 +79,15 @@ void hislip_CopyMemory(char* destination, void** sources, size_t* sizes, u32_t n
 // ----------------------------------------------------------------------------
 
 
-err_t hislip_DataEnd(hislip_instr_t* hislip_instr)
+int8_t hislip_DataEnd(hislip_instr_t* hislip_instr)
 {
-	err_t err = ERR_OK;
 
 	hislip_msg_t msg_rx;
 
 	char* buf;
 	char* end;
 
-	const char* ends[3] = {LINE_ENDING_CR, LINE_ENDING_LF, LINE_ENDING_CRLF};
+	static const char* ends[3] = {LINE_ENDING_CR, LINE_ENDING_LF, LINE_ENDING_CRLF};
 
 	msg_rx = hislip_MsgParser(hislip_instr);
 
@@ -117,6 +98,8 @@ err_t hislip_DataEnd(hislip_instr_t* hislip_instr)
 		end = strstr(buf, ends[i]);
 		if(NULL != end)
 		{
+			memset(hislip_instr->end, 0, sizeof(hislip_instr->end));
+			memcpy(hislip_instr->end,ends[i],strlen(ends[i]));
 			break;
 		}
 
@@ -125,59 +108,25 @@ err_t hislip_DataEnd(hislip_instr_t* hislip_instr)
 	if(NULL != end)
 	{
 		memcpy(end, SCPI_LINE_ENDING, strlen(SCPI_LINE_ENDING));
+		msg_rx.payload_len.lo -= strlen(SCPI_LINE_ENDING);
+
 	}
 	else
 	{
 		memcpy(buf + msg_rx.payload_len.lo, SCPI_LINE_ENDING, strlen(SCPI_LINE_ENDING));
 	}
 
-	SCPI_Input(&scpi_context, buf, msg_rx.payload_len.lo + strlen(SCPI_LINE_ENDING));
+	memcpy(&hislip_instr->msg, &msg_rx, sizeof(msg_rx));
 
-
-	return err;
+	return SCPI_Input(&scpi_context, buf, msg_rx.payload_len.lo + strlen(SCPI_LINE_ENDING));
 }
 
-/*
-err_t hislip_DataEnd(hislip_instr_t* hislip_instr)
+
+
+
+int8_t hislip_AsyncMaximumMessageSize(hislip_instr_t* hislip_instr)
 {
-	err_t err = ERR_OK;
-
-	hislip_msg_t msg_rx, msg_tx;
-	payload_len_t max_msg_size;
-
-	char data[] = "ABCad,123123,432,123213\n";
-
-	void* sources[] = {&msg_tx, &data};
-	size_t sizes[] = {sizeof(hislip_msg_t), strlen(data)};
-
-	msg_rx = hislip_MsgParser(hislip_instr);
-
-	size_t sum = hislip_SumSize(sizes, 2);
-
-	char payload[sum];
-
-	msg_tx.prologue = HISLIP_PROLOGUE;
-	msg_tx.msg_type = HISLIP_DATAEND;
-	msg_tx.control_code = 0x00;
-	msg_tx.msg_param = msg_rx.msg_param;
-	msg_tx.payload_len.hi = 0;
-	msg_tx.payload_len.lo = strlen(data);
-
-	hislip_htonl(&msg_tx);
-
-	hislip_CopyMemory(payload, sources, sizes, 2);
-
-	vTaskDelay(pdMS_TO_TICKS(1));
-	err = netconn_write(hislip_instr->netconn.newconn, payload, sum, NETCONN_NOFLAG);
-
-	return err;
-}
-*/
-
-
-err_t hislip_AsyncMaximumMessageSize(hislip_instr_t* hislip_instr)
-{
-	err_t err = ERR_OK;
+	int8_t err = ERR_OK;
 	hislip_msg_t msg_tx;
 	payload_len_t max_msg_size;
 
@@ -209,9 +158,9 @@ err_t hislip_AsyncMaximumMessageSize(hislip_instr_t* hislip_instr)
 	return err;
 }
 
-err_t hislip_AsyncInitialize(hislip_instr_t* hislip_instr)
+int8_t hislip_AsyncInitialize(hislip_instr_t* hislip_instr)
 {
-	err_t err = ERR_OK;
+	int8_t err = ERR_OK;
 	hislip_msg_t msg_rx, msg_tx;
 
 	msg_rx = hislip_MsgParser(hislip_instr);
@@ -233,9 +182,9 @@ err_t hislip_AsyncInitialize(hislip_instr_t* hislip_instr)
 	return err;
 }
 
-err_t hislip_Initialize(hislip_instr_t* hislip_instr)
+int8_t hislip_Initialize(hislip_instr_t* hislip_instr)
 {
-	err_t err = ERR_OK;
+	int8_t err = ERR_OK;
 	char name_ref[] = "hislip0";
 	char name_rx[12];
 	char* data;
@@ -270,24 +219,24 @@ err_t hislip_Initialize(hislip_instr_t* hislip_instr)
 
 // ----------------------------------------------------------------------------
 
-static void hislip_Callback(struct netconn *conn, enum netconn_evt even, u16_t len)
+static void hislip_Callback(struct netconn *conn, enum netconn_evt even, uint16_t len)
 {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
 	if(NETCONN_EVT_RCVPLUS == even)
 	{
 
-		static u32_t test = 1;
+		static uint32_t test = 1;
 		xQueueSendFromISR(hislip_queue, &test, &xHigherPriorityTaskWoken);
 
 	}
 }
 
-static struct netconn*  hislip_Bind(u16_t port)
+static struct netconn*  hislip_Bind(uint16_t port)
 {
 
 	struct netconn* conn;
-	err_t err;
+	int8_t err;
 
 	conn = netconn_new(NETCONN_TCP);
 	err = netconn_bind(conn, IP_ADDR_ANY, port);
@@ -318,11 +267,11 @@ static hislip_msg_t hislip_MsgParser(hislip_instr_t* hislip_instr)
 
 static hislip_msg_type_t hislip_Recv(hislip_instr_t* hislip_instr)
 {
-	err_t err;
+	int8_t err;
 	struct netbuf* buf;
 	void* data;
-	u16_t len = 0;
-	u16_t offset = 0;
+	uint16_t len = 0;
+	uint16_t offset = 0;
 	hislip_msg_t hislip_msg;
 
 	hislip_instr->netbuf.len = 0;
@@ -374,39 +323,10 @@ static hislip_msg_type_t hislip_Recv(hislip_instr_t* hislip_instr)
 
 }
 
-/*
-static err_t hislip_Accept(hislip_instr_t* hislip_instr)
-{
-	struct netconn *newconn;
-	err_t err = ERR_OK;
-
-	if(NETCONN_ACCEPT_OFF == hislip_instr->netconn.accept)
-	{
-		err = netconn_accept(hislip_instr->netconn.conn, &newconn);
-
-		if(ERR_OK == err)
-		{
-			hislip_instr->netconn.newconn = newconn;
-			hislip_instr->netconn.accept = NETCONN_ACCEPT_ON;
-
-			#if LWIP_SO_RCVTIMEO == 1
-				netconn_set_recvtimeout(hislip_instr->netconn.newconn, 1000);
-			#endif
-		}
-	}
-	else
-	{
-		hislip_instr->netconn.accept = NETCONN_ACCEPT_OFF;
-		err = ERR_OK;
-	}
-
-	return err;
-}
-*/
 
 static void hislip_Init(hislip_instr_t* hislip_instr)
 {
-
+	memset(hislip_instr->end, 0, sizeof(hislip_instr->end));
 }
 
 
@@ -416,6 +336,16 @@ static void hislip_SyncTask(void  *arg)
 	hislip_Init(&hislip_instr);
 
 	hislip_instr.netconn.newconn = (struct netconn*)arg;
+
+    SCPI_Init(&scpi_context,
+            scpi_commands,
+            &scpi_interface,
+            scpi_units_def,
+            SCPI_IDN1, SCPI_IDN2, SCPI_IDN3, SCPI_IDN4,
+            scpi_input_buffer, SCPI_INPUT_BUFFER_LENGTH,
+            scpi_error_queue_data, SCPI_ERROR_QUEUE_SIZE);
+
+    scpi_context.user_context = (void*)&hislip_instr;
 
 	for (;;)
 	{
@@ -480,7 +410,7 @@ static void hislip_aSyncTask(void  *arg)
 
 static void hislip_ServerTask(void const *argument)
 {
-	err_t err;
+	int8_t err;
 	struct netconn* newconn;
 	struct netconn* conn = hislip_Bind(HISLIP_PORT);
 
