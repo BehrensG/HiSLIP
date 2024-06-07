@@ -78,8 +78,8 @@ all: main-build
 main-build: HiSLIP.elf secondary-outputs
 
 # Tool invocations
-HiSLIP.elf HiSLIP.map: $(OBJS) $(USER_OBJS) /home/grzegorz/git/HiSLIP/SOFTWARE/STM32H743ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "HiSLIP.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"/home/grzegorz/git/HiSLIP/SOFTWARE/STM32H743ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="HiSLIP.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+HiSLIP.elf HiSLIP.map: $(OBJS) $(USER_OBJS) D:\tmp\HiSLIP\SOFTWARE\STM32H743ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "HiSLIP.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"D:\tmp\HiSLIP\SOFTWARE\STM32H743ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="HiSLIP.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

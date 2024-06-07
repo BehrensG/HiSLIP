@@ -104,6 +104,29 @@ typedef enum
 
 }hislip_msg_type_t;
 
+
+typedef enum {
+
+	FERR_UNIDENTIFIED_ERROR,
+	FERR_POORLY_FORMED_MSG_HEADER,
+	FEER_CONNECTION_WITHOUT_INIT,
+	FEER_INVALID_INIT_SEQ,
+	FEER_MAX_NUM_OF_CLIENTS,
+	FEER_SECURE_CONNECTION_FAILED
+}hislip_fatal_error_t;
+
+
+typedef enum {
+
+	ERR_UNIDENTIFIED_ERROR,
+	ERR_UNRECOGNIZED_MSG_TYPE,
+	ERR_UNRECOGNIZED_CONTROL_CODE,
+	ERR_UNRECOGNIZED_VENDOR_MSG,
+	ERR_MSG_TOO_LARGE,
+	ERR_AUTH_FAILED
+
+}hislip_error_t;
+
 #pragma pack(push, 1)
 
 typedef struct
@@ -144,6 +167,42 @@ typedef struct {
 
 
 void hislip_CreateTask(void);
+
+// SUPPORT Functions
+
+void hislip_Init(hislip_instr_t* hislip_instr);
 void hislip_htonl(hislip_msg_t* hislip_msg);
+size_t hislip_SumSize(size_t* sizes, size_t len);
+void hislip_CopyMemory(char* destination, void** sources, size_t* sizes, uint32_t num_sources);
+hislip_msg_t hislip_MsgParser(hislip_instr_t* hislip_instr);
+
+// SYNC Commands
+
+int8_t hislip_InitializeResponse(hislip_instr_t* hislip_instr);
+int8_t hislip_DataEnd(hislip_instr_t* hislip_instr);
+int8_t hislip_Data(hislip_instr_t* hislip_instr);
+int8_t hislip_Trigger(hislip_instr_t* hislip_instr);
+int8_t hislip_DeviceClearAcknowledge(hislip_instr_t* hislip_instr);
+int8_t hislip_Interrupted(hislip_instr_t* hislip_instr);
+
+// ASYNC Commands
+
+int8_t hislip_AsyncMaximumMessageSizeResponse(hislip_instr_t* hislip_instr);
+int8_t hislip_AsyncInitializeResponse(hislip_instr_t* hislip_instr);
+int8_t hislip_AsyncStatusQuery(hislip_instr_t* hislip_instr);
+int8_t hislip_AsyncDeviceClearAcknowledge(hislip_instr_t* hislip_instr);
+int8_t hislip_AsyncLockResponse(hislip_instr_t* hislip_instr);
+int8_t hislip_AsyncLockInfoResponse(hislip_instr_t* hislip_instr);
+int8_t hislip_AsyncRemoteLocalResponse(hislip_instr_t* hislip_instr);
+int8_t hislip_AsyncInterrupted(hislip_instr_t* hislip_instr);
+int8_t hislip_AsyncServiceRequest(hislip_instr_t* hislip_instr);
+int8_t hislip_AsyncStatusResponse(hislip_instr_t* hislip_instr);
+
+
+// EITHER Sync or aSync
+
+int8_t hislip_Error(hislip_instr_t* hislip_instr);
+int8_t hislip_FatalError(hislip_instr_t* hislip_instr);
+int8_t hislip_GetDescriptorsResponse(hislip_instr_t* hislip_instr);
 
 #endif /* HISLIP_INC_HISLIP_H_ */
