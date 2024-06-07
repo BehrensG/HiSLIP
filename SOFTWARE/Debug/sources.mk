@@ -27,6 +27,7 @@ Core/SCPI \
 Core/SCPI/libscpi/src \
 Core/Src \
 Core/Startup \
+Core/mDNS \
 Drivers/BSP/Components/lan8742 \
 Drivers/STM32H7xx_HAL_Driver/Src \
 LWIP/App \
@@ -36,6 +37,7 @@ Middlewares/Third_Party/FreeRTOS/Source \
 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
 Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang \
 Middlewares/Third_Party/LwIP/src/api \
+Middlewares/Third_Party/LwIP/src/apps/mdns \
 Middlewares/Third_Party/LwIP/src/apps/mqtt \
 Middlewares/Third_Party/LwIP/src/core \
 Middlewares/Third_Party/LwIP/src/core/ipv4 \
