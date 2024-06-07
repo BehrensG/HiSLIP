@@ -78,7 +78,7 @@ int8_t hislip_DataEnd(hislip_instr_t* hislip_instr)
 
 	memcpy(&hislip_instr->msg, &msg_rx, sizeof(msg_rx));
 
-	if(!strcmp(buf,"?")) // is it a query
+	if(NULL != strchr(buf,'?')) // is it a query
 	{
 		return SCPI_Input(&scpi_context, buf, msg_rx.payload_len.lo + strlen(SCPI_LINE_ENDING));
 	}

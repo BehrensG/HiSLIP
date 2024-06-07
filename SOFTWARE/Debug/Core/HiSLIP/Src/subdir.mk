@@ -5,13 +5,25 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Core/HiSLIP/Src/HiSLIP.c 
+../Core/HiSLIP/Src/HiSLIP_Either.c \
+../Core/HiSLIP/Src/HiSLIP_Support.c \
+../Core/HiSLIP/Src/HiSLIP_Sync.c \
+../Core/HiSLIP/Src/HiSLIP_Task.c \
+../Core/HiSLIP/Src/HiSLIP_aSync.c 
 
 OBJS += \
-./Core/HiSLIP/Src/HiSLIP.o 
+./Core/HiSLIP/Src/HiSLIP_Either.o \
+./Core/HiSLIP/Src/HiSLIP_Support.o \
+./Core/HiSLIP/Src/HiSLIP_Sync.o \
+./Core/HiSLIP/Src/HiSLIP_Task.o \
+./Core/HiSLIP/Src/HiSLIP_aSync.o 
 
 C_DEPS += \
-./Core/HiSLIP/Src/HiSLIP.d 
+./Core/HiSLIP/Src/HiSLIP_Either.d \
+./Core/HiSLIP/Src/HiSLIP_Support.d \
+./Core/HiSLIP/Src/HiSLIP_Sync.d \
+./Core/HiSLIP/Src/HiSLIP_Task.d \
+./Core/HiSLIP/Src/HiSLIP_aSync.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -21,7 +33,7 @@ Core/HiSLIP/Src/%.o Core/HiSLIP/Src/%.su Core/HiSLIP/Src/%.cyclo: ../Core/HiSLIP
 clean: clean-Core-2f-HiSLIP-2f-Src
 
 clean-Core-2f-HiSLIP-2f-Src:
-	-$(RM) ./Core/HiSLIP/Src/HiSLIP.cyclo ./Core/HiSLIP/Src/HiSLIP.d ./Core/HiSLIP/Src/HiSLIP.o ./Core/HiSLIP/Src/HiSLIP.su
+	-$(RM) ./Core/HiSLIP/Src/HiSLIP_Either.cyclo ./Core/HiSLIP/Src/HiSLIP_Either.d ./Core/HiSLIP/Src/HiSLIP_Either.o ./Core/HiSLIP/Src/HiSLIP_Either.su ./Core/HiSLIP/Src/HiSLIP_Support.cyclo ./Core/HiSLIP/Src/HiSLIP_Support.d ./Core/HiSLIP/Src/HiSLIP_Support.o ./Core/HiSLIP/Src/HiSLIP_Support.su ./Core/HiSLIP/Src/HiSLIP_Sync.cyclo ./Core/HiSLIP/Src/HiSLIP_Sync.d ./Core/HiSLIP/Src/HiSLIP_Sync.o ./Core/HiSLIP/Src/HiSLIP_Sync.su ./Core/HiSLIP/Src/HiSLIP_Task.cyclo ./Core/HiSLIP/Src/HiSLIP_Task.d ./Core/HiSLIP/Src/HiSLIP_Task.o ./Core/HiSLIP/Src/HiSLIP_Task.su ./Core/HiSLIP/Src/HiSLIP_aSync.cyclo ./Core/HiSLIP/Src/HiSLIP_aSync.d ./Core/HiSLIP/Src/HiSLIP_aSync.o ./Core/HiSLIP/Src/HiSLIP_aSync.su
 
 .PHONY: clean-Core-2f-HiSLIP-2f-Src
 

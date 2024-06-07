@@ -187,7 +187,6 @@ static void hislip_aSyncTask(void  *arg)
 			case AsyncLock : hislip_AsyncLockResponse(&hislip_instr); break;
 			case AsyncLockInfo : hislip_AsyncLockInfoResponse(&hislip_instr); break;
 			case AsyncRemoteLocalControl : hislip_AsyncRemoteLocalResponse(&hislip_instr); break;
-			case AsyncStatusQuery : hislip_AsyncStatusResponse(&hislip_instr); break;
 
 			case GetDescriptors : hislip_GetDescriptorsResponse(&hislip_instr); break;
 

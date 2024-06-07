@@ -40,7 +40,7 @@ size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
 
 			msg_tx.prologue = HISLIP_PROLOGUE;
 			msg_tx.msg_type = HISLIP_DATAEND;
-			msg_tx.control_code = 0x00;
+			msg_tx.control_code = hislip_instr->msg.control_code;
 			msg_tx.msg_param = hislip_instr->msg.msg_param;
 			msg_tx.payload_len.hi = 0;
 			msg_tx.payload_len.lo = payload_sum + strlen(HISLIP_LINE_ENDING);
@@ -51,7 +51,9 @@ size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
 
 			memcpy(payload + sizeof(hislip_msg_t) + payload_sum, HISLIP_LINE_ENDING, strlen(HISLIP_LINE_ENDING));
 
-			if(ERR_OK == netconn_write(hislip_instr->netconn.newconn, payload, sizeof(hislip_msg_t) + payload_sum + strlen(HISLIP_LINE_ENDING), NETCONN_COPY))
+			vTaskDelay(pdMS_TO_TICKS(1));
+			if(ERR_OK == netconn_write(hislip_instr->netconn.newconn, payload,
+					sizeof(hislip_msg_t) + payload_sum + strlen(HISLIP_LINE_ENDING), NETCONN_COPY))
 			{
 				len = 0;
 			}
@@ -65,7 +67,7 @@ size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
 
 			msg_tx.prologue = HISLIP_PROLOGUE;
 			msg_tx.msg_type = HISLIP_DATA;
-			msg_tx.control_code = 0x00;
+			msg_tx.control_code = hislip_instr->msg.control_code;
 			msg_tx.msg_param = hislip_instr->msg.msg_param;
 			msg_tx.payload_len.hi = 0;
 			msg_tx.payload_len.lo = payload_sum + strlen(HISLIP_LINE_ENDING);
@@ -74,6 +76,7 @@ size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
 
 			memcpy(payload, &msg_tx, sizeof(hislip_msg_t));
 
+			vTaskDelay(pdMS_TO_TICKS(1));
 			if(ERR_OK == netconn_write(hislip_instr->netconn.newconn, payload, payload_sum, NETCONN_COPY))
 			{
 				len = 0;
