@@ -64,3 +64,15 @@ hislip_msg_t hislip_MsgParser(hislip_instr_t* hislip_instr)
 	return hislip_msg;
 }
 
+
+void hislip_DataHeader(hislip_instr_t* hislip_instr, hislip_msg_t* msg, uint8_t msg_type, uint32_t size)
+{
+	msg->prologue = HISLIP_PROLOGUE;
+	msg->msg_type = msg_type;
+	msg->control_code = hislip_instr->msg.control_code;
+	msg->msg_param = hislip_instr->msg.msg_param;
+	msg->payload_len.hi = 0;
+	msg->payload_len.lo = size;
+
+	hislip_htonl(msg);
+}

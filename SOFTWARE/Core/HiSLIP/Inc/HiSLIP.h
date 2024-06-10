@@ -175,6 +175,7 @@ void hislip_htonl(hislip_msg_t* hislip_msg);
 size_t hislip_SumSize(size_t* sizes, size_t len);
 void hislip_CopyMemory(char* destination, void** sources, size_t* sizes, uint32_t num_sources);
 hislip_msg_t hislip_MsgParser(hislip_instr_t* hislip_instr);
+void hislip_DataHeader(hislip_instr_t* hislip_instr, hislip_msg_t* msg, uint8_t msg_type, uint32_t size);
 
 // SYNC Commands
 

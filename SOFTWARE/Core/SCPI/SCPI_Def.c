@@ -105,9 +105,18 @@ scpi_result_t SCPI_SystemErrorQ(scpi_t * context)
 	return SCPI_RES_OK;
 }
 
+float test[10000];
 
-scpi_result_t SCPI_TS(scpi_t * context)
+scpi_result_t SCPI_MeasQ(scpi_t * context)
 {
+
+	for(uint32_t i = 0; i < 10000; i++)
+	{
+		test[i] = i*0.0013;
+	}
+
+	SCPI_ResultArrayFloat(context, test, 100, SCPI_FORMAT_ASCII);
+
     return SCPI_RES_OK;
 }
 
@@ -139,7 +148,7 @@ const scpi_command_t scpi_commands[] = {
     {.pattern = "SYSTem:ERRor:COUNt?", .callback = SCPI_SystemErrorCountQ,},
     {.pattern = "SYSTem:VERSion?", .callback = SCPI_SystemVersionQ,},
 
-	{.pattern = "TS", .callback = SCPI_TS,},
+	{.pattern = "Meas?", .callback = SCPI_MeasQ,},
 
 
 
