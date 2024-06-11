@@ -326,6 +326,21 @@ static void low_level_init(struct netif *netif)
     MACConf.DuplexMode = duplex;
     MACConf.Speed = speed;
     HAL_ETH_SetMACConfig(&heth, &MACConf);
+    ETH_MACFilterConfigTypeDef FilterConfig;
+
+    HAL_ETH_GetMACFilterConfig(&heth,&FilterConfig);
+    FilterConfig.PromiscuousMode = 1;
+    FilterConfig.HashUnicast = 0;
+    FilterConfig.HashMulticast = 0;
+    FilterConfig.DestAddrInverseFiltering = 0;
+    FilterConfig.PassAllMulticast = 0;
+    FilterConfig.BroadcastFilter = 1;
+    FilterConfig.ControlPacketsFilter = 0x03;
+    FilterConfig.SrcAddrInverseFiltering = 0;
+    FilterConfig.SrcAddrFiltering = 0;
+    FilterConfig.HachOrPerfectFilter = 0;
+    FilterConfig.ReceiveAllMode = 1;
+    HAL_ETH_SetMACFilterConfig(&heth,&FilterConfig);
 
     HAL_ETH_Start_IT(&heth);
     netif_set_up(netif);

@@ -248,7 +248,7 @@ void hislip_CreateTask(void)
 {
 
 	hislip_handler = xTaskCreateStatic(hislip_ServerTask,"hislip_ServerTask",
-			HISLIP_THREAD_STACKSIZE, (void*)1, tskIDLE_PRIORITY + 2,
+			HISLIP_THREAD_STACKSIZE, (void*)1, tskIDLE_PRIORITY + 3,
 			hislip_buffer, &hislip_control_block);
 
 }

@@ -53,6 +53,8 @@
 #define ETH_RX_BUFFER_SIZE 1536
 /*----- Default Value for LWIP_IGMP: 0 ---*/
 #define LWIP_IGMP 1
+/*----- Default Value for LWIP_DNS: 0 ---*/
+#define LWIP_DNS 1
 /*----- Default Value for MEMP_NUM_UDP_PCB: 4 ---*/
 #define MEMP_NUM_UDP_PCB 20
 /*----- Default Value for MEMP_NUM_TCP_PCB: 5 ---*/
@@ -71,14 +73,34 @@
 #define MEMP_NUM_PBUF 20
 /*----- Default Value for MEMP_NUM_RAW_PCB: 4 ---*/
 #define MEMP_NUM_RAW_PCB 20
+/*----- Default Value for MEMP_NUM_TCP_PCB_LISTEN: 8 ---*/
+#define MEMP_NUM_TCP_PCB_LISTEN 20
 /*----- Default Value for MEMP_NUM_TCP_SEG: 16 ---*/
 #define MEMP_NUM_TCP_SEG 20
+/*----- Default Value for MEMP_NUM_NETBUF: 2 ---*/
+#define MEMP_NUM_NETBUF 20
+/*----- Default Value for MEMP_NUM_NETCONN: 4 ---*/
+#define MEMP_NUM_NETCONN 20
+/*----- Default Value for MEMP_NUM_TCPIP_MSG_API: 8 ---*/
+#define MEMP_NUM_TCPIP_MSG_API 20
+/*----- Default Value for MEMP_NUM_SELECT_CB: 4 ---*/
+#define MEMP_NUM_SELECT_CB 20
 /*----- Value supported for H7 devices: 1 -----*/
 #define LWIP_SUPPORT_CUSTOM_PBUF 1
 /*----- Default Value for PBUF_POOL_BUFSIZE: 592 ---*/
 #define PBUF_POOL_BUFSIZE 1024
 /*----- Value in opt.h for LWIP_ETHERNET: LWIP_ARP || PPPOE_SUPPORT -*/
 #define LWIP_ETHERNET 1
+/*----- Default Value for LWIP_RAW: 0 ---*/
+#define LWIP_RAW 1
+/*----- Default Value for LWIP_AUTOIP: 0 ---*/
+#define LWIP_AUTOIP 1
+/*----- Default Value for DNS_TABLE_SIZE: 4 ---*/
+#define DNS_TABLE_SIZE 8
+/*----- Default Value for DNS_MAX_SERVERS: 2 ---*/
+#define DNS_MAX_SERVERS 20
+/*----- Default Value for DNS_MAX_RETRIES: 4 ---*/
+#define DNS_MAX_RETRIES 20
 /*----- Value in opt.h for LWIP_DNS_SECURE: (LWIP_DNS_SECURE_RAND_XID | LWIP_DNS_SECURE_NO_MULTIPLE_OUTSTANDING | LWIP_DNS_SECURE_RAND_SRC_PORT) -*/
 #define LWIP_DNS_SECURE 7
 /*----- Default Value for TCP_MSS: 536 ---*/
@@ -108,9 +130,9 @@
 /*----- Value in opt.h for DEFAULT_THREAD_PRIO: 1 -----*/
 #define DEFAULT_THREAD_PRIO 6
 /*----- Value in opt.h for DEFAULT_UDP_RECVMBOX_SIZE: 0 -----*/
-#define DEFAULT_UDP_RECVMBOX_SIZE 6
+#define DEFAULT_UDP_RECVMBOX_SIZE 20
 /*----- Value in opt.h for DEFAULT_TCP_RECVMBOX_SIZE: 0 -----*/
-#define DEFAULT_TCP_RECVMBOX_SIZE 6
+#define DEFAULT_TCP_RECVMBOX_SIZE 20
 /*----- Value in opt.h for DEFAULT_ACCEPTMBOX_SIZE: 0 -----*/
 #define DEFAULT_ACCEPTMBOX_SIZE 6
 /*----- Value in opt.h for LWIP_SOCKET: 1 -----*/
@@ -142,8 +164,7 @@
 #define LWIP_SO_RCVTIMEO	0
 #define MEMP_NUM_NETCONN    20
 
-#define LWIP_IGMP                      1
-#define LWIP_MULTICAST_PING            1
+//#define LWIP_MULTICAST_PING            1
 #define LWIP_MDNS_RESPONDER            1
 /* USER CODE END 1 */
 

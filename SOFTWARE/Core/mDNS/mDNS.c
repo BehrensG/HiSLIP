@@ -28,11 +28,11 @@ mdns_example_report(struct netif* netif, u8_t result)
 }
 #endif
 
-extern struct netif gnetif;
+//extern struct netif gnetif;
 void
 mdns_example_init(void)
 {
-	netif_default = &gnetif ;
+	//netif_default = &gnetif ;
 	netif_default->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_IGMP;
 #if LWIP_MDNS_RESPONDER
   mdns_resp_register_name_result_cb(mdns_example_report);

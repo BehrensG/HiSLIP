@@ -45,7 +45,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 osThreadId defaultTaskHandle;
-uint32_t defaultTaskBuffer[ 512 ];
+uint32_t defaultTaskBuffer[ 2048 ];
 osStaticThreadDef_t defaultTaskControlBlock;
 /* USER CODE BEGIN PV */
 
@@ -128,7 +128,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 512, defaultTaskBuffer, &defaultTaskControlBlock);
+  osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 2048, defaultTaskBuffer, &defaultTaskControlBlock);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -331,16 +331,15 @@ void StartDefaultTask(void const * argument)
   /* init code for LWIP */
   MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
-  osDelay(300);
-  //mdns_example_init();
+  osDelay(100);
+  mdns_example_init();
   hislip_CreateTask();
-
 
   /* Infinite loop */
   for(;;)
   {
 	//  HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
-	  osDelay(250);
+	  osDelay(5000);
 	//  mdns_resp_announce(netif_default);
   }
   /* USER CODE END 5 */
