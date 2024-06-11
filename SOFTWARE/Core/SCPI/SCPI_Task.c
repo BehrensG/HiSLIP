@@ -17,8 +17,137 @@
 
 static char payload[PAYLOAD_SIZE];
 static size_t payload_sum = 0;
+static uint32_t payload_full_count = 0;
 
-size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
+typedef enum {
+	SCPI_WRITE_END,
+	SCPI_WRITE_FULL_DATA
+}scpi_write_state_t;
+
+static scpi_write_state_t scpi_write_state = SCPI_WRITE_END;
+
+static size_t SCPI_WriteEnd(hislip_instr_t* hislip_instr, char* payload, size_t* payload_sum, uint32_t* payload_full_count)
+
+{
+	hislip_msg_t msg;
+	size_t len = 0;
+	size_t offset = 0;
+	size_t header_size = 0;
+
+	if(0 == *payload_full_count)
+	{
+		hislip_DataHeader(hislip_instr, &msg, HISLIP_DATAEND, *payload_sum + strlen(HISLIP_LINE_ENDING));
+
+		memcpy(payload, &msg, sizeof(hislip_msg_t));
+		memcpy(payload + sizeof(hislip_msg_t) + *payload_sum, HISLIP_LINE_ENDING, strlen(HISLIP_LINE_ENDING));
+		offset = 0;
+		header_size = sizeof(hislip_msg_t);
+	}
+	else
+	{
+
+		memcpy(payload + sizeof(hislip_msg_t) + *payload_sum, HISLIP_LINE_ENDING, strlen(HISLIP_LINE_ENDING));
+		offset = sizeof(hislip_msg_t);
+		header_size = 0;
+	}
+
+
+	vTaskDelay(pdMS_TO_TICKS(1));
+	if(ERR_OK == netconn_write(hislip_instr->netconn.newconn, payload + offset,
+			header_size + *payload_sum + strlen(HISLIP_LINE_ENDING), NETCONN_COPY))
+	{
+		len = 0;
+	}
+	else
+	{
+		len = *payload_sum;
+	}
+
+	*payload_sum = 0;
+	*payload_full_count = 0;
+
+	memset(payload,0, PAYLOAD_SIZE);
+
+	return len;
+
+
+}
+
+
+static size_t SCPI_WriteSegment(hislip_instr_t* hislip_instr, char* payload, size_t* payload_sum, uint32_t* payload_full_count)
+
+{
+	size_t len = 0;
+	size_t offset = 0;
+	size_t header_size = 0;
+
+	if(1 == *payload_full_count) // by first full segment also add header
+	{
+		hislip_msg_t msg;
+
+		hislip_DataHeader(hislip_instr, &msg, HISLIP_DATAEND, HISLIP_MAX_DATA_SIZE);
+		memcpy(payload, &msg, sizeof(hislip_msg_t));
+
+		offset = 0 ;
+		header_size = sizeof(hislip_msg_t);
+	}
+	else
+	{
+		offset = sizeof(hislip_msg_t) ;
+		header_size = 0;
+	}
+
+	vTaskDelay(pdMS_TO_TICKS(1));
+	if(ERR_OK == netconn_write(hislip_instr->netconn.newconn, payload + offset, header_size + HISLIP_MAX_DATA_SIZE, NETCONN_COPY))
+	{
+		len = 0;
+	}
+
+	*payload_sum = *payload_sum % HISLIP_MAX_DATA_SIZE;
+
+	return len;
+
+
+}
+
+
+size_t SCPI_WriteHiSLIPV2(scpi_t * context, const char * data, size_t len) {
+
+	hislip_instr_t* hislip_instr = (hislip_instr_t*)context->user_context;
+
+	if(NULL != hislip_instr)
+	{
+
+		bool end = ((len == strlen(SCPI_LINE_ENDING)) && (!strcmp(data, SCPI_LINE_ENDING)));
+
+		memcpy(payload + sizeof(hislip_msg_t) + payload_sum, data, len);
+		payload_sum += len;
+
+		if(end)
+		{
+			scpi_write_state = SCPI_WRITE_END;
+		}
+		else if(HISLIP_MAX_DATA_SIZE <= payload_sum)
+		{
+			scpi_write_state = SCPI_WRITE_FULL_DATA;
+			payload_full_count++;
+		}
+
+		switch(scpi_write_state)
+		{
+			case SCPI_WRITE_END : SCPI_WriteEnd(hislip_instr,payload, &payload_sum, &payload_full_count); break;
+			case SCPI_WRITE_FULL_DATA : SCPI_WriteSegment(hislip_instr, payload, &payload_sum, &payload_full_count) ; break;
+			default : len = 0; break;
+		}
+
+	}
+
+    return len;
+}
+
+
+
+size_t SCPI_WriteHiSLIP(scpi_t * context, const char * data, size_t len) {
 
 	hislip_instr_t* hislip_instr = (hislip_instr_t*)context->user_context;
 
@@ -26,16 +155,16 @@ size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
 	{
 		hislip_msg_t msg_tx;
 
-		bool is_tail = ((len == strlen(SCPI_LINE_ENDING)) && (!strcmp(data, SCPI_LINE_ENDING)));
+		bool tail = ((len == strlen(SCPI_LINE_ENDING)) && (!strcmp(data, SCPI_LINE_ENDING)));
 
-		if(!is_tail)
+		if(!tail)
 		{
 			memcpy(payload + sizeof(hislip_msg_t) + payload_sum, data, len);
 			payload_sum += len;
 		}
 
 
-		if(is_tail)
+		if(tail)
 		{
 
 			hislip_DataHeader(hislip_instr, &msg_tx, HISLIP_DATAEND, payload_sum + strlen(HISLIP_LINE_ENDING));
@@ -53,23 +182,25 @@ size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
 
 			payload_sum = 0;
 			memset(payload,0, PAYLOAD_SIZE);
+			payload_full_count = 0;
 
 		}
 		else if(HISLIP_MAX_DATA_SIZE <= payload_sum) // payload full
 		{
 
-			hislip_DataHeader(hislip_instr, &msg_tx, HISLIP_DATA, payload_sum);
+
+			hislip_DataHeader(hislip_instr, &msg_tx, HISLIP_DATAEND, HISLIP_MAX_DATA_SIZE);
 
 			memcpy(payload, &msg_tx, sizeof(hislip_msg_t));
 
 			vTaskDelay(pdMS_TO_TICKS(1));
-			if(ERR_OK == netconn_write(hislip_instr->netconn.newconn, payload, payload_sum, NETCONN_COPY))
+			if(ERR_OK == netconn_write(hislip_instr->netconn.newconn, payload, HISLIP_MAX_DATA_SIZE, NETCONN_COPY))
 			{
 				len = 0;
 			}
 
-			payload_sum = 0;
-			memset(payload,0, PAYLOAD_SIZE);
+			payload_sum -= HISLIP_MAX_DATA_SIZE;
+			memcpy(payload + sizeof(hislip_msg_t), data, payload_sum);
 
 		}
 	}

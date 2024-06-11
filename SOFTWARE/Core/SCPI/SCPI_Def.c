@@ -110,12 +110,19 @@ float test[10000];
 scpi_result_t SCPI_MeasQ(scpi_t * context)
 {
 
-	for(uint32_t i = 0; i < 10000; i++)
+	uint32_t value;
+
+	if(!SCPI_ParamUInt32(context, &value, true))
 	{
-		test[i] = i*0.0013;
+		return SCPI_RES_ERR;
 	}
 
-	SCPI_ResultArrayFloat(context, test, 100, SCPI_FORMAT_ASCII);
+	for(uint32_t i = 0; i < value; i++)
+	{
+		test[i] = i*0.0001;
+	}
+
+	SCPI_ResultArrayFloat(context, test, value, SCPI_FORMAT_ASCII);
 
     return SCPI_RES_OK;
 }
@@ -157,7 +164,7 @@ const scpi_command_t scpi_commands[] = {
 
 scpi_interface_t scpi_interface = {
     .error = SCPI_Error,
-    .write = SCPI_Write,
+    .write = SCPI_WriteHiSLIP,
     .control = SCPI_Control,
     .flush = SCPI_Flush,
     .reset = SCPI_Reset,
