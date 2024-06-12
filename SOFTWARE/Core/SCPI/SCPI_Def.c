@@ -39,11 +39,11 @@
 #include <string.h>
 #include <cmsis_os.h>
 
-
+#include "api.h"
 #include "main.h"
 #include "scpi/scpi.h"
 #include "SCPI_Def.h"
-
+#include "HiSLIP.h"
 
 scpi_choice_def_t scpi_boolean_select[] =
 {
@@ -62,27 +62,48 @@ static scpi_result_t SCPI_Rst(scpi_t * context)
     return SCPI_RES_OK;
 }
 
+static err_t SCPI_NetconnWrite(hislip_instr_t* hislip_instr, const char* payload, size_t len)
+{
+	vTaskDelay(pdMS_TO_TICKS(1));
+	return netconn_write(hislip_instr->netconn.newconn, payload, len, NETCONN_NOFLAG);
+
+}
+
+
 static scpi_result_t SCPI_IdnQ(scpi_t * context)
 {
+	hislip_instr_t* hislip_instr = (hislip_instr_t*)context->user_context;
+	hislip_msg_t msg;
+
+	size_t header_size = sizeof(hislip_msg_t);
+
 	int32_t ptr = 0;
-	char info[128];
-	memset(info,0,128);
+	char info[header_size + 46];
 
     for (uint8_t i = 0; i < 4; i++)
     {
         if (context->idn[i])
         {
-        	if(3 != i)
-        		ptr += snprintf(info + ptr, sizeof(info) - ptr, "%s,", context->idn[i] );
+        	if(3 == i)
+        	{
+        		ptr += snprintf(info + header_size + ptr, sizeof(info) - header_size - ptr, "%s", context->idn[i]);
+        	}
         	else
         	{
-        		ptr += snprintf(info + ptr, sizeof(info) - ptr, "%s", context->idn[i] );
+        		ptr += snprintf(info + header_size + ptr, sizeof(info) - header_size - ptr, "%s,", context->idn[i]);
         	}
         }
 
     }
 
-    SCPI_ResultCharacters(context, info, ptr);
+
+    hislip_DataHeader(hislip_instr, &msg, HISLIP_DATAEND, ptr + strlen(HISLIP_LINE_ENDING));
+	memcpy(info, &msg, sizeof(hislip_msg_t));
+
+	memcpy(info + header_size + ptr, HISLIP_LINE_ENDING, strlen(HISLIP_LINE_ENDING));
+
+	SCPI_NetconnWrite(hislip_instr, info, ptr + header_size + strlen(HISLIP_LINE_ENDING));
+
     return SCPI_RES_OK;
 }
 

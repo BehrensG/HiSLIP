@@ -39,6 +39,6 @@ mdns_example_init(void)
   mdns_resp_init();
   mdns_resp_add_netif(netif_default, "lwip",1);
   mdns_resp_add_service(netif_default, "hislip0", "_hislip", DNSSD_PROTO_TCP, 4880, 1, srv_txt, NULL);
-  mdns_resp_announce(netif_default);
+ // mdns_resp_announce(netif_default);
 #endif
 }

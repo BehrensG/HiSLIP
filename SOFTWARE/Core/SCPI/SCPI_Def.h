@@ -5,8 +5,8 @@
 
 #define SCPI_INPUT_BUFFER_LENGTH 512
 #define SCPI_ERROR_QUEUE_SIZE 17
-#define SCPI_IDN1 "GB"
-#define SCPI_IDN2 "ETH1ISO224"
+#define SCPI_IDN1 "SCPI"
+#define SCPI_IDN2 "Test Device"
 #define SCPI_IDN3 "0.01"
 #define SCPI_IDN4 "SN000000000001"
 
