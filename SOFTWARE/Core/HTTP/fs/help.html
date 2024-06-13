@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCPI Commands Documentation</title>
+    <style>
+        body {
+            font-family: Helvetica,Arial,Times;
+            margin-top: 30px;
+            margin-left: 40px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .command-category {
+            margin-top: 20px;
+        }
+        .command-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .command-list li {
+            background: #f9f9f9;
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .command {
+            font-weight: bold;
+        }
+        .description {
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>SCPI Commands Documentation</h1>
+    <p>This document provides the device SCPI (Standard Commands for Programmable Instruments) commands.</p>
+    
+    <div class="command-category">
+        <h2>Basic Commands</h2>
+        <ul class="command-list">
+            <li>
+                <span class="command">*IDN?</span>
+                <div class="description">Queries the instrument's identity (manufacturer, model, serial number, and firmware version).</div>
+            </li>
+            <li>
+                <span class="command">*RST</span>
+                <div class="description">Perform a hardware reset. WARNING: Connection will be clost.</div>
+            </li>
+            <li>
+                <span class="command">*CLS</span>
+                <div class="description">Clears the status data structures.</div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="command-category">
+        <h2>Measurement Commands</h2>
+        <ul class="command-list">
+            <li>
+                <span class="command">MEAS:VOLT:DC?</span>
+                <div class="description">Measures the DC voltage.</div>
+            </li>
+            <li>
+                <span class="command">MEAS:CURR:DC?</span>
+                <div class="description">Measures the DC current.</div>
+                
+            </li>
+            <li>
+                <span class="command">MEAS:RES?</span>
+                <div class="description">Measures the resistance.</div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="command-category">
+        <h2>Configuration Commands</h2>
+        <ul class="command-list">
+            <li>
+                <span class="command">CONF:VOLT:DC</span>
+                <div class="description">Configures the instrument to measure DC voltage.</div>
+            </li>
+            <li>
+                <span class="command">CONF:CURR:DC</span>
+                <div class="description">Configures the instrument to measure DC current.</div>
+            </li>
+            <li>
+                <span class="command">CONF:RES</span>
+                <div class="description">Configures the instrument to measure resistance.</div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="command-category">
+        <h2>Control Commands</h2>
+        <ul class="command-list">
+            <li>
+                <span class="command">OUTP ON</span>
+                <div class="description">Turns the output on.</div>
+            </li>
+            <li>
+                <span class="command">OUTP OFF</span>
+                <div class="description">Turns the output off.</div>
+            </li>
+            <li>
+                <span class="command">SYST:ERR?</span>
+                <div class="description">Queries the error queue.</div>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

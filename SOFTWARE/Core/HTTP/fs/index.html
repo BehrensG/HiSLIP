@@ -9,13 +9,14 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            overflow: hidden
         }
         .row {
             display: flex;
             flex-grow: 1;
         }
         .top {
-            height: 6%;
+            height: 5%;
             
         }
         .bottom {
@@ -38,24 +39,28 @@
         }
 
       .site-link {
-      display: block;
-      padding: 10px;
-      margin: 10px 5px;
-      background-color: #e9ecef;
-      color: #000;
-      text-decoration: solid;
-      border-radius: 4px;
-      text-align: center;
+            display: block;
+            padding: 25px;
+            margin: 2px 2px;
+            background-color: inherit;
+            color: #000000;
+            text-decoration: solid;
+            border-radius: 2px;
+            text-align: center;
+            font-weight: lighter;
+            font-size: small;
+            font-family: Helvetica,Arial,Times;
      }
 
     .site-link:hover {
-      background-color: #fffbfb;
+      background-color: #bab5b5;
      }
      .left-frame {
-            background-color: #adacac;
-            width: 150px;
-            padding: 15px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            background-color: inherit;
+            width: 110px;
+            margin-top: 0px;
+            padding: 1px;
+            box-shadow: 1px 0 1px rgba(0, 0, 0, 0.1);
         }
 
 
@@ -70,9 +75,10 @@
     </div>
     <div class="row bottom">
         <div class="left-frame">
-            <a href="#" class="site-link" onclick="newSrc('home.html')">Home</a>
-            <a href="#" class="site-link" onclick="newSrc('configuration.html')">Configuration</a>
-            <a href="#" class="site-link" onclick="newSrc('support.html')">Support</a>
+            <a href="#" class="site-link" onclick="newSrc('home.html')">HOME</a>
+            <a href="#" class="site-link" onclick="newSrc('setup.html')">SETUP</a>
+            <a href="#" class="site-link" onclick="newSrc('support.html')">SUPPORT</a>
+            <a href="#" class="site-link" onclick="newSrc('help.html')">HELP</a>
         </div>
         <div class="column right">
             <iframe src="home.html" id="MainFrame"></iframe>

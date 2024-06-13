@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body{
+            margin-top: 30px;
+            margin-left: 70px;
+        }
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            margin: 15px;
+        }
+        td {
+            border: 1px solid #fff; /* Set border color to white */
+            padding: 6px;
+            text-align: left;
+            font-family: Helvetica,Arial,Times;
+        }
+        .first-column {
+            background-color:  #558093;
+            color: #f2f2f2;
+            font-weight: bold;
+            font-family: Helvetica,Arial,Times;
+            width: 30%;
+        }
+
+        tr:nth-child(odd) .second-column {
+            background-color: #f5f4f4; /* Grey background for odd rows in the second column */
+            
+        }
+        textarea {
+
+            outline: 1px;
+            resize: none;
+            width: 98%;
+            background-color: inherit;
+        }
+
+        h2 {
+            color: #558093;
+            font-family: Helvetica,Arial,Times;
+            font-weight: bold;
+        }
+        .t-scroller {
+            display:inline-block;
+            clear:both;
+        }
+        
+</style>   
+
+</head>
+    <body>
+        <h2>UNSECURE DEVICE</h2>
+        <table>
+            <tbody >
+                <tr>
+                    <td class="first-column">Password: </td>
+                    <td class="second-column"><textarea id="password" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column"> </td>
+                    <td class="second-column"><button id="password_button" onclick="">Send password</button></td>
+                </tr>
+            </tbody>
+        </table> 
+        <p style="margin-bottom: 50px;"></p>
+        <h2>NETWORK DEVICE CONFIGURATION</h2>
+        <table>
+            <tbody>
+                <tr>
+                    <td class="first-column">IP Address: </td>
+                    <td class="second-column"><textarea  id="setup_ipv4" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column">Subnet Mask: </td>
+                    <td class="second-column"><textarea  id="setup_netmask" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column">Default Gateway: </td>
+                    <td class="second-column"><textarea  id="setup_gateway" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column"></td>
+                    <td class="second-column"><button id="net_setup_button" onclick="">Send configuration</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="margin-bottom: 50px;"></p>
+        <h2>DEVICE SETUP</h2>
+        <table>
+            <tbody >
+                <tr>
+                    <td class="first-column">Device Type: </td>
+                    <td class="second-column"><textarea  id="setup_device" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column"></td>
+                    <td class="second-column"><button id="device_setup_button" onclick="">Send configuration</button></td>
+                </tr>
+            </tbody>
+        </table> 
+
+    </body>
+</html>

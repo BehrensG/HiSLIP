@@ -8,7 +8,7 @@
 #include "lwip/apps/fs.h"
 #include "api.h"
 
-char** http_cmd[] = {"GET / http/1.1", "GET /top.html", "GET /home.html", "GET /configuration.html", "GET /support.h", "GET /index.html"};
+char** http_cmd[] = {"GET / HTTP/1.1", "GET /top.html", "GET /home.html", "GET /configuration.html", "GET /support.h", "GET /index.html"};
 
 static void http_server(struct netconn *conn)
 {

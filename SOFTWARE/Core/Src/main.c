@@ -334,6 +334,7 @@ void StartDefaultTask(void const * argument)
   osDelay(100);
  // mdns_example_init();
   hislip_CreateTask();
+  osDelay(100);
   HTTP_CreateTask();
 
   /* Infinite loop */

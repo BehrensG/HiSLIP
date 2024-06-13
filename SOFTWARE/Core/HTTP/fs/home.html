@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Two Column HTML Table Example</title>
+    
     <style>
+        body{
+            margin-top: 30px;
+            margin-left: 70px;
+        }
         table {
             width: 50%;
             border-collapse: collapse;
@@ -16,63 +20,95 @@
             font-family: Helvetica,Arial,Times;
         }
         .first-column {
-            background-color: #2f5081;
+            background-color:  #558093;
             color: #f2f2f2;
             font-weight: bold;
             font-family: Helvetica,Arial,Times;
+            width: 30%;
         }
+
         tr:nth-child(odd) .second-column {
-            background-color: #dbd9d9; /* Grey background for odd rows in the second column */
+            background-color: #f5f4f4; /* Grey background for odd rows in the second column */
             
         }
-    </style>
+        textarea {
+            border: none;
+            outline: none;
+            resize: none;
+            background-color: inherit;
+        }
+
+        h2 {
+            color: #558093;
+            font-family: Helvetica,Arial,Times;
+            font-weight: bold;
+        }
+        .t-scroller {
+             display:inline-block;
+             clear:both;
+        }
+</style>
+
 </head>
-<body>
-    <h1>Two Column Table</h1>
-    <table>
-        <tbody>
-            <tr>
-                <td class="first-column">Instrument: </td>
-                <td class="second-column"></td>
-            </tr>
-            <tr>
-                <td class="first-column">Serial Number:</td>
-                <td class="second-column">Row 2, Cell 2</td>
-            </tr>
-            <tr>
-                <td class="first-column">Description: </td>
-                <td class="second-column">Row 3, Cell 2</td>
-            </tr>
-            <tr>
-                <td class="first-column">IP Address:</td>
-                <td class="second-column">Row 4, Cell 2</td>
-            </tr>
-        </tbody>
-    </table>
-  
-  
-    <table>
-      <tbody>
-          <tr>
-              <td class="first-column">Instrument: </td>
-              <td class="second-column"></td>
-          </tr>
-          <tr>
-              <td class="first-column">Serial Number:</td>
-              <td class="second-column">Row 2, Cell 2</td>
-          </tr>
-          <tr>
-              <td class="first-column">Description: </td>
-              <td class="second-column">Row 3, Cell 2</td>
-          </tr>
-          <tr>
-              <td class="first-column">IP Address:</td>
-              <td class="second-column">Row 4, Cell 2</td>
-          </tr>
-      </tbody>
-  </table>
+    <body>
+        <h2>   DEVICE INFORMATION</h2>
+        <table>
+            <tbody style="max-width: 100px">
+                <tr>
+                    <td class="first-column">Instrument: </td>
+                    <td class="second-column"><textarea readonly id="info_instr" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column">Serial Number:</td>
+                    <td class="second-column"><textarea readonly id="info_sn" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column">Description: </td>
+                    <td class="second-column"><textarea readonly id="info_descr" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column">IP Address:</td>
+                    <td class="second-column"><textarea readonly id="info_ipv4" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column">Subnet Mask: </td>
+                    <td class="second-column"><textarea readonly id="info_netmask" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column">Default Gateway: </td>
+                    <td class="second-column"><textarea readonly id="info_gateway" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column">MAC Address:</td>
+                    <td class="second-column"><textarea readonly id="info_mac" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column">VISA Resource String:</td>
+                    <td class="second-column"><textarea readonly id="info_visa" cols="20" rows="2"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column">Auto-MDIX Capable:</td>
+                    <td class="second-column"><textarea readonly id="info_mdix" cols="20" rows="1"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="first-column">mDNS:</td>
+                    <td class="second-column"><textarea readonly id="info_mdns" cols="20" rows="1"></textarea></td>
+                </tr>
+            </tbody>
 
-  
 
-</body>
+            
+        </table>
+        <p style="margin-bottom: 50px;"></p>
+        <h2>SPECIAL FUNCTIONS INFORMATION</h2>
+        <table>
+            <tbody >
+                <tr>
+                    <td class="first-column">UDP Port: </td>
+                    <td class="second-column"><textarea readonly id="info_udp" cols="20" rows="1"></textarea></td>
+                </tr>
+
+            </tbody>
+        </table> 
+    </body>
 </html>
