@@ -332,8 +332,9 @@ void StartDefaultTask(void const * argument)
   MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
   osDelay(100);
-  mdns_example_init();
+ // mdns_example_init();
   hislip_CreateTask();
+  HTTP_CreateTask();
 
   /* Infinite loop */
   for(;;)

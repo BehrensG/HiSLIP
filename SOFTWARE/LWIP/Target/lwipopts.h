@@ -58,7 +58,7 @@
 /*----- Default Value for MEMP_NUM_UDP_PCB: 4 ---*/
 #define MEMP_NUM_UDP_PCB 20
 /*----- Default Value for MEMP_NUM_TCP_PCB: 5 ---*/
-#define MEMP_NUM_TCP_PCB 20
+#define MEMP_NUM_TCP_PCB 100
 /*----- Default Value for MEMP_MEM_MALLOC: 0 ---*/
 #define MEMP_MEM_MALLOC 1
 /*----- Default Value for MEMP_MEM_INIT: 0 ---*/
@@ -70,11 +70,11 @@
 /*----- Default Value for H7 devices: 0x30044000 -----*/
 #define LWIP_RAM_HEAP_POINTER 0x30020000
 /*----- Default Value for MEMP_NUM_PBUF: 16 ---*/
-#define MEMP_NUM_PBUF 20
+#define MEMP_NUM_PBUF 100
 /*----- Default Value for MEMP_NUM_RAW_PCB: 4 ---*/
 #define MEMP_NUM_RAW_PCB 20
 /*----- Default Value for MEMP_NUM_TCP_PCB_LISTEN: 8 ---*/
-#define MEMP_NUM_TCP_PCB_LISTEN 20
+#define MEMP_NUM_TCP_PCB_LISTEN 100
 /*----- Default Value for MEMP_NUM_TCP_SEG: 16 ---*/
 #define MEMP_NUM_TCP_SEG 20
 /*----- Default Value for MEMP_NUM_NETBUF: 2 ---*/
@@ -139,6 +139,24 @@
 #define LWIP_SOCKET 0
 /*----- Value in opt.h for RECV_BUFSIZE_DEFAULT: INT_MAX -----*/
 #define RECV_BUFSIZE_DEFAULT 2000000000
+/*----- Default Value for LWIP_HTTPD: 0 ---*/
+#define LWIP_HTTPD 1
+/*----- Default Value for LWIP_HTTPD_CGI_SSI: 0 ---*/
+#define LWIP_HTTPD_CGI_SSI 1
+/*----- Default Value for LWIP_HTTPD_SSI: 0 ---*/
+#define LWIP_HTTPD_SSI 1
+/*----- Default Value for LWIP_HTTPD_MAX_CGI_PARAMETERS: 16 ---*/
+#define LWIP_HTTPD_MAX_CGI_PARAMETERS 32
+/*----- Default Value for LWIP_HTTPD_MAX_TAG_NAME_LEN: 8 ---*/
+#define LWIP_HTTPD_MAX_TAG_NAME_LEN 256
+/*----- Default Value for LWIP_HTTPD_MAX_TAG_INSERT_LEN: 192 ---*/
+#define LWIP_HTTPD_MAX_TAG_INSERT_LEN 256
+/*----- Default Value for HTTPD_MAX_RETRIES: 4 ---*/
+#define HTTPD_MAX_RETRIES 10
+/*----- Default Value for LWIP_HTTPD_MAX_REQUEST_URI_LEN: 63 ---*/
+#define LWIP_HTTPD_MAX_REQUEST_URI_LEN 256
+/*----- Default Value for LWIP_HTTPD_POST_MAX_RESPONSE_URI_LEN: 63 ---*/
+#define LWIP_HTTPD_POST_MAX_RESPONSE_URI_LEN 256
 /*----- Default Value for LWIP_MDNS: 0 ---*/
 #define LWIP_MDNS 1
 /*----- Value in opt.h for LWIP_STATS: 1 -----*/
