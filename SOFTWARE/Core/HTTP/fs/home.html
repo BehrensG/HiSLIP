@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Two Column HTML Table Example</title>
+    <style>
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            margin: 15px;
+        }
+        td {
+            border: 1px solid #fff; /* Set border color to white */
+            padding: 6px;
+            text-align: left;
+            font-family: Helvetica,Arial,Times;
+        }
+        .first-column {
+            background-color: #2f5081;
+            color: #f2f2f2;
+            font-weight: bold;
+            font-family: Helvetica,Arial,Times;
+        }
+        tr:nth-child(odd) .second-column {
+            background-color: #dbd9d9; /* Grey background for odd rows in the second column */
+            
+        }
+    </style>
+</head>
+<body>
+    <h1>Two Column Table</h1>
+    <table>
+        <tbody>
+            <tr>
+                <td class="first-column">Instrument: </td>
+                <td class="second-column"></td>
+            </tr>
+            <tr>
+                <td class="first-column">Serial Number:</td>
+                <td class="second-column">Row 2, Cell 2</td>
+            </tr>
+            <tr>
+                <td class="first-column">Description: </td>
+                <td class="second-column">Row 3, Cell 2</td>
+            </tr>
+            <tr>
+                <td class="first-column">IP Address:</td>
+                <td class="second-column">Row 4, Cell 2</td>
+            </tr>
+        </tbody>
+    </table>
+  
+  
+    <table>
+      <tbody>
+          <tr>
+              <td class="first-column">Instrument: </td>
+              <td class="second-column"></td>
+          </tr>
+          <tr>
+              <td class="first-column">Serial Number:</td>
+              <td class="second-column">Row 2, Cell 2</td>
+          </tr>
+          <tr>
+              <td class="first-column">Description: </td>
+              <td class="second-column">Row 3, Cell 2</td>
+          </tr>
+          <tr>
+              <td class="first-column">IP Address:</td>
+              <td class="second-column">Row 4, Cell 2</td>
+          </tr>
+      </tbody>
+  </table>
+
+  
+
+</body>
+</html>
