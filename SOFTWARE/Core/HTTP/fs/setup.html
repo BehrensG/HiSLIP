@@ -62,7 +62,6 @@
 
     function onload(){
 
-        toggle_table(secure);
         const ids = ["setup_ipv4", "setup_netmask", "setup_gateway"];
         ids.forEach(id => {
         const xhr = new XMLHttpRequest();
@@ -77,16 +76,35 @@
         };
 
         xhr.send();
+        get_login_status();
+        toggle_table(secure);
+        });
+    }
+
+    function post_network_configuration(){
+        const ids = ["setup_ipv4", "setup_netmask" , "setup_gateway"];
+        ids.forEach(id => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", id, true);  // Modify the URL according to your needs
+        xhr.send(document.getElementById(id).value);
         
         });
     }
 
-    function send_password(){
+    function post_password(){
 
-        var password = document.getElementById("pass").value;
-        console.log(password);
+        var passwrd = document.getElementById("password").value;
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/login', true);
+
+        xhr.send(passwrd);
+        get_login_status();
+    }
+
+    function get_login_status(){
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/login_status', true);
 
         xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -98,15 +116,16 @@
                     secure = false;
                     toggle_table(false);
                 }
-            } else {
-                secure = true;
-                toggle_table(true);
+                else
+                {
+                    secure = true;
+                    toggle_table(true);
+                }
             }
         }
-    };
-
-    // Send the request with the data
-    xhr.send(password);
+        
+      }
+      xhr.send();
     }
 
     function toggle_table(table_status) {
@@ -143,11 +162,11 @@
                     textareas[i].classList.add('invalid');
                     allValid = false;
                 }
-
-                if(allValid)
-                {
-                    // send data to server only when data is valid
-                }
+            }
+            
+            if(allValid)
+            {
+                post_network_configuration();
             }
         }
 
@@ -155,23 +174,23 @@
 
 </head>
     <body onload = "onload()">
-        <h2>UNSECURE DEVICE</h2>
+        <h2>UNLOCK INSTRUMENT</h2>
         <table >
             <tbody  >
                 <tr>
                     <td class="first-column">Password: </td>
                     <td class="second-column"><div>
-                        <input type="password" id="pass" name="password" width="100%"/>
+                        <input type="password" id="password" name="password" width="100%"/>
                       </div></textarea></td>
                 </tr>
                 <tr>
                     <td class="first-column"> </td>
-                    <td class="second-column"><button onclick="send_password()" id="password_button" onclick="">Unlock device</button></td>
+                    <td class="second-column"><button onclick="post_password()" id="password_button" onclick="">Unlock device</button></td>
                 </tr>
             </tbody>
         </table> 
         <p style="margin-bottom: 50px;"></p>
-        <h2>NETWORK DEVICE CONFIGURATION</h2>
+        <h2>NETWORK CONFIGURATION</h2>
         <table id="setup_table">
             <tbody>
                 <tr>

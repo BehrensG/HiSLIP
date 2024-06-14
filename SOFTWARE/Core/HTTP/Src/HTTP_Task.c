@@ -43,17 +43,6 @@ typedef enum{
 }http_get_home_t;
 
 
-char* http_get_setup[] ={"GET /setup_ipv4", "GET /setup_netmask", "GET /setup_gateway", "POST /login"};
-
-typedef enum{
-	HTTP_GET_SETUP_INSTR,
-	HTTP_GET_SETUP_NETMASK,
-	HTTP_GET_SETUP_GATEWAY,
-	HTTP_POST_PASSWORD,
-	HTTP_POST_IP,
-	HTTP_POST_NETMASK,
-	HTTP_POST_GATEWAY
-}http_get_setup_t;
 
 static bool http_load_website(struct netconn *conn, char* buf, u16_t buflen)
 {
@@ -99,10 +88,9 @@ static err_t http_send(struct netconn *conn, char* pagedata)
 	return netconn_write(conn, (const unsigned char*)pagedata, strlen(pagedata), NETCONN_NOCOPY);
 }
 
-static s32_t http_read_header(char* buf, char* headers[])
+static s32_t http_read_header(char* buf, char* headers[], u32_t size)
 {
 	s32_t cmp = -1;
-	u32_t size = sizeof(headers)/sizeof(headers[0]);
 
 	for(u8_t i = 0; i < size; i++)
 	{
@@ -130,53 +118,116 @@ static char* http_post_data(char* buf, u16_t buflen, u16_t* post_data_len)
 
 }
 
+
+char* http_get_setup[] ={"GET /setup_ipv4", "GET /setup_netmask", "GET /setup_gateway", "POST /login", "GET /login_status",
+						"POST /setup_ipv4", "POST /setup_netmask", "POST /setup_gateway"};
+
+typedef enum{
+	HTTP_GET_SETUP_INSTR,
+	HTTP_GET_SETUP_NETMASK,
+	HTTP_GET_SETUP_GATEWAY,
+	HTTP_POST_PASSWORD,
+	HTTP_GET_PASSWORD_STATUS,
+	HTTP_POST_SETUP_INSTR,
+	HTTP_POST_SETUP_NETMASK,
+	HTTP_POST_SETUP_GATEWAY
+}http_get_setup_t;
+
+static char ip4[48];
+static char netmask[48];
+static char gateway[48];
+
+
+char post_valid_response[] =
+    "HTTP/1.1 200 OK\r\n"
+    "Content-Type: text/plain\r\n"
+    "Content-Length: 0\r\n\r\n";
+
 static bool http_setup_page(struct netconn *conn, char* buf, u16_t buflen)
 {
 	s32_t header = -1;
 	bool status = false;
-	bool get = false;
-	bool post = false;
-	bool valid_password = false;
+
+	static bool valid_password;
+	u16_t post_data_len = 0;
 
 	char pagedata[128];
 	memset(pagedata,0,128);
 
-	header = http_read_header(buf, http_get_setup);
+	header = http_read_header(buf, http_get_setup, sizeof(http_get_setup)/sizeof(http_get_setup[0]));
 
 	switch(header)
 	{
 		case HTTP_GET_SETUP_INSTR : {
-			get = true;
-			post = false;
+
 			strcpy(pagedata,"192.168.1.123");
 		}; break;
 
 		case HTTP_GET_SETUP_NETMASK : {
-				get = true;
-				post = false;
+
 				strcpy(pagedata,"255.255.255.0");
 			}; break;
 
 		case HTTP_GET_SETUP_GATEWAY : {
-			get = true;
-			post = false;
+
 			strcpy(pagedata,"192.168.1.254");
 		}; break;
 
 		case HTTP_POST_PASSWORD : {
+
+
 			char* password ="1234";
-			u16_t post_data_len;
 			char* data = http_post_data(buf, buflen, &post_data_len);
 
 			if(!strncmp(data,password,strlen(password)))
 			{
 				valid_password = true;
+
 			}
 			else
 			{
 				valid_password = false;
 			}
 
+			memcpy(pagedata, post_valid_response, strlen(post_valid_response));
+
+		}; break;
+
+		case HTTP_GET_PASSWORD_STATUS : {
+
+			if(valid_password)
+			{
+				strcpy(pagedata,"VALID");
+			}
+			else
+			{
+				strcpy(pagedata,"INVALID");
+			}
+
+		}; break;
+
+		case HTTP_POST_SETUP_INSTR : {
+
+
+			char* data = http_post_data(buf, buflen, &post_data_len);
+			memcpy(ip4, data, post_data_len);
+			memcpy(pagedata, post_valid_response, strlen(post_valid_response));
+		}; break;
+
+		case HTTP_POST_SETUP_NETMASK : {
+
+
+			char* data = http_post_data(buf, buflen, &post_data_len);
+			memcpy(netmask, data, post_data_len);
+			memcpy(pagedata, post_valid_response, strlen(post_valid_response));
+		}; break;
+
+		case HTTP_POST_SETUP_GATEWAY : {
+
+
+			char* data = http_post_data(buf, buflen, &post_data_len);
+			memcpy(gateway, data, post_data_len);
+			memcpy(pagedata, post_valid_response, strlen(post_valid_response));
 		}; break;
 
 		default: /* DO NOTHING */; break;
@@ -184,11 +235,8 @@ static bool http_setup_page(struct netconn *conn, char* buf, u16_t buflen)
 
 	if(header >= 0)
 	{
-		if(get)
-		{
-			http_send(conn,pagedata);
-		}
 
+		http_send(conn,pagedata);
 		status = true;
 	}
 
@@ -204,7 +252,7 @@ static bool http_home_page(struct netconn *conn, char* buf, u16_t buflen)
 	char pagedata[128];
 	memset(pagedata,0,128);
 
-	header = http_read_header(buf, http_get_home);
+	header = http_read_header(buf, http_get_home, sizeof(http_get_home)/sizeof(http_get_home[0]));
 
 	switch(header)
 	{
