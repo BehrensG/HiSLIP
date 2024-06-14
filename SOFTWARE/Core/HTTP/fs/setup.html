@@ -50,14 +50,53 @@
         
 </style>   
 
+<script>
+    
+    function onload(){
+        const ids = ["setup_ipv4", "setup_netmask", "setup_gateway"];
+        ids.forEach(id => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "${id}", true);  // Modify the URL according to your needs
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    console.log(`Response for ${id}:`, xhr.responseText);
+                    // Handle the response for the specific ID here
+                } else {
+                    console.error(`Error for ${id}:`, xhr.status, xhr.statusText);
+                }
+            }
+         };
+
+        xhr.send();
+        });
+    }
+
+/*
+    function onload(){
+        xhr = new XMLHttpRequest ();
+        xhr.open("GET", "setup_ipv4", true);
+        xhr.send(null);
+        xhr.open("GET", "setup_netmask", true);
+        xhr.send(null);
+        xhr.open("GET", "setup_gateway", true);
+        xhr.send(null);
+    }
+*/
+
+</script>
+
 </head>
-    <body>
+    <body onload = "onload()">
         <h2>UNSECURE DEVICE</h2>
         <table>
             <tbody >
                 <tr>
                     <td class="first-column">Password: </td>
-                    <td class="second-column"><textarea id="password" cols="20" rows="1"></textarea></td>
+                    <td class="second-column"><div>
+                        <input type="password" id="pass" name="password" width="100%"/>
+                      </div></textarea></td>
                 </tr>
                 <tr>
                     <td class="first-column"> </td>
@@ -87,20 +126,5 @@
                 </tr>
             </tbody>
         </table>
-        <p style="margin-bottom: 50px;"></p>
-        <h2>DEVICE SETUP</h2>
-        <table>
-            <tbody >
-                <tr>
-                    <td class="first-column">Device Type: </td>
-                    <td class="second-column"><textarea  id="setup_device" cols="20" rows="1"></textarea></td>
-                </tr>
-                <tr>
-                    <td class="first-column"></td>
-                    <td class="second-column"><button id="device_setup_button" onclick="">Send configuration</button></td>
-                </tr>
-            </tbody>
-        </table> 
-
     </body>
 </html>

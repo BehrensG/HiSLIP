@@ -50,7 +50,62 @@
 </style>
 
 </head>
-    <body>
+
+<script>
+    
+    function onload(){
+        const ids = ["info_instr", "info_sn" , "info_descr", "info_ipv4", "info_netmask",
+                    "info_gateway", "info_mac","info_visa", "info_mdix", "info_mdns", "info_udp"];
+        ids.forEach(id => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "${id}", true);  // Modify the URL according to your needs
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    console.log(`Response for ${id}:`, xhr.responseText);
+                    // Handle the response for the specific ID here
+                } else {
+                    console.error(`Error for ${id}:`, xhr.status, xhr.statusText);
+                }
+            }
+        };
+
+        xhr.send();
+        });
+    }
+
+/*
+    function onload(){
+        xhr = new XMLHttpRequest ();
+        xhr.open("GET", "info_instr", true);
+        xhr.send(null);
+        xhr.open("GET", "info_sn", true);
+        xhr.send(null);
+        xhr.open("GET", "info_descr", true);
+        xhr.send(null);
+        xhr.open("GET", "info_ipv4", true);
+        xhr.send(null);
+        xhr.open("GET", "info_netmask", true);
+        xhr.send(null);
+        xhr.open("GET", "info_gateway", true);
+        xhr.send(null);
+        xhr.open("GET", "info_mac", true);
+        xhr.send(null);
+        xhr.open("GET", "info_visa", true);
+        xhr.send(null);
+        xhr.open("GET", "info_mdix", true);
+        xhr.send(null);
+        xhr.open("GET", "info_mdns", true);
+        xhr.send(null);
+        xhr.open("GET", "info_udp", true);
+        xhr.send(null);
+    }
+*/
+
+</script>
+
+    <body onload = "onload()">
         <h2>   DEVICE INFORMATION</h2>
         <table>
             <tbody style="max-width: 100px">
@@ -111,4 +166,5 @@
             </tbody>
         </table> 
     </body>
+
 </html>

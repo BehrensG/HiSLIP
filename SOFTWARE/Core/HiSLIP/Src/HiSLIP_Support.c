@@ -6,6 +6,8 @@
  */
 
 
+#include <string.h>
+
 #include "HiSLIP.h"
 
 
