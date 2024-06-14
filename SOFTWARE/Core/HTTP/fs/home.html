@@ -32,6 +32,7 @@
             
         }
         textarea {
+            width: 100%;
             border: none;
             outline: none;
             resize: none;
@@ -58,50 +59,20 @@
                     "info_gateway", "info_mac","info_visa", "info_mdix", "info_mdns", "info_udp"];
         ids.forEach(id => {
         const xhr = new XMLHttpRequest();
-        xhr.open("GET", "${id}", true);  // Modify the URL according to your needs
+        xhr.open("GET", id, true);  // Modify the URL according to your needs
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    console.log(`Response for ${id}:`, xhr.responseText);
-                    // Handle the response for the specific ID here
-                } else {
-                    console.error(`Error for ${id}:`, xhr.status, xhr.statusText);
+                    document.getElementById(id).value = xhr.responseText;
                 }
             }
         };
 
         xhr.send();
+        
         });
     }
-
-/*
-    function onload(){
-        xhr = new XMLHttpRequest ();
-        xhr.open("GET", "info_instr", true);
-        xhr.send(null);
-        xhr.open("GET", "info_sn", true);
-        xhr.send(null);
-        xhr.open("GET", "info_descr", true);
-        xhr.send(null);
-        xhr.open("GET", "info_ipv4", true);
-        xhr.send(null);
-        xhr.open("GET", "info_netmask", true);
-        xhr.send(null);
-        xhr.open("GET", "info_gateway", true);
-        xhr.send(null);
-        xhr.open("GET", "info_mac", true);
-        xhr.send(null);
-        xhr.open("GET", "info_visa", true);
-        xhr.send(null);
-        xhr.open("GET", "info_mdix", true);
-        xhr.send(null);
-        xhr.open("GET", "info_mdns", true);
-        xhr.send(null);
-        xhr.open("GET", "info_udp", true);
-        xhr.send(null);
-    }
-*/
 
 </script>
 
@@ -111,7 +82,7 @@
             <tbody style="max-width: 100px">
                 <tr>
                     <td class="first-column">Instrument: </td>
-                    <td class="second-column"><textarea readonly id="info_instr" cols="20" rows="1"></textarea></td>
+                    <td class="second-column"><textarea  id="info_instr" cols="20" rows="1"></textarea></td>
                 </tr>
                 <tr>
                     <td class="first-column">Serial Number:</td>

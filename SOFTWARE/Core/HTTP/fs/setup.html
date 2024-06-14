@@ -47,51 +47,117 @@
             display:inline-block;
             clear:both;
         }
-        
+        .valid {
+            background-color: lightgreen;
+        }
+        .invalid {
+            background-color: lightcoral;
+        }
 </style>   
 
 <script>
     
+    let secure = true;
+    let valid = "VALID"
+
     function onload(){
+
+        toggle_table(secure);
         const ids = ["setup_ipv4", "setup_netmask", "setup_gateway"];
         ids.forEach(id => {
         const xhr = new XMLHttpRequest();
-        xhr.open("GET", "${id}", true);  // Modify the URL according to your needs
+        xhr.open("GET", id, true);  // Modify the URL according to your needs
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    console.log(`Response for ${id}:`, xhr.responseText);
-                    // Handle the response for the specific ID here
-                } else {
-                    console.error(`Error for ${id}:`, xhr.status, xhr.statusText);
+                    document.getElementById(id).value = xhr.responseText;
                 }
             }
-         };
+        };
 
         xhr.send();
+        
         });
     }
 
-/*
-    function onload(){
-        xhr = new XMLHttpRequest ();
-        xhr.open("GET", "setup_ipv4", true);
-        xhr.send(null);
-        xhr.open("GET", "setup_netmask", true);
-        xhr.send(null);
-        xhr.open("GET", "setup_gateway", true);
-        xhr.send(null);
+    function send_password(){
+
+        var password = document.getElementById("pass").value;
+        console.log(password);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/login', true);
+
+        xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+
+            if (xhr.status === 200) {
+
+                if(xhr.responseText == valid)
+                {
+                    secure = false;
+                    toggle_table(false);
+                }
+            } else {
+                secure = true;
+                toggle_table(true);
+            }
+        }
+    };
+
+    // Send the request with the data
+    xhr.send(password);
     }
-*/
+
+    function toggle_table(table_status) {
+            var table = document.getElementById("setup_table");
+            var textareas = table.getElementsByTagName("textarea");
+            var buttons = table.getElementsByTagName('button');
+            for (var i = 0; i < textareas.length; i++) {
+                textareas[i].disabled = table_status;
+            }
+
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = table_status;
+            }
+        }
+
+
+        function validate_ip() {
+            var table = document.getElementById('setup_table');
+            var textareas = table.getElementsByTagName('textarea');
+            var ipPattern = /^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])$/;
+            var validIPs = [];
+            var invalidIPs = [];
+            var allValid = true;
+
+            for (var i = 0; i < textareas.length; i++) {
+                var ip = textareas[i].value.trim();
+                if (ipPattern.test(ip)) {
+                    validIPs.push(ip);
+                    textareas[i].classList.remove('invalid');
+                    textareas[i].classList.add('valid');
+                } else {
+                    invalidIPs.push(ip);
+                    textareas[i].classList.remove('valid');
+                    textareas[i].classList.add('invalid');
+                    allValid = false;
+                }
+
+                if(allValid)
+                {
+                    // send data to server only when data is valid
+                }
+            }
+        }
 
 </script>
 
 </head>
     <body onload = "onload()">
         <h2>UNSECURE DEVICE</h2>
-        <table>
-            <tbody >
+        <table >
+            <tbody  >
                 <tr>
                     <td class="first-column">Password: </td>
                     <td class="second-column"><div>
@@ -100,13 +166,13 @@
                 </tr>
                 <tr>
                     <td class="first-column"> </td>
-                    <td class="second-column"><button id="password_button" onclick="">Send password</button></td>
+                    <td class="second-column"><button onclick="send_password()" id="password_button" onclick="">Unlock device</button></td>
                 </tr>
             </tbody>
         </table> 
         <p style="margin-bottom: 50px;"></p>
         <h2>NETWORK DEVICE CONFIGURATION</h2>
-        <table>
+        <table id="setup_table">
             <tbody>
                 <tr>
                     <td class="first-column">IP Address: </td>
@@ -122,9 +188,10 @@
                 </tr>
                 <tr>
                     <td class="first-column"></td>
-                    <td class="second-column"><button id="net_setup_button" onclick="">Send configuration</button></td>
+                    <td class="second-column"><button id="net_setup_button" onclick="validate_ip()">Update configuration</button></td>
                 </tr>
             </tbody>
         </table>
+        <p>NOTE: The network configuration changes will have effect after device reset.</p>
     </body>
 </html>

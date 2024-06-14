@@ -14,9 +14,6 @@
 char* http_get_site[] = {"GET / HTTP/1.1", "GET /top.html", "GET /home.html", "GET /setup.html",
 						"GET /support.html", "GET /index.html", "GET /help.html"};
 
-char* http_get_home[] ={"GET /info_instr", "GET /info_sn", "GET /info_descr", "GET /info_ipv4", "GET /info_netmask",
-					"GET /info_gateway", "GET /info_mac", "GET /info_visa", "GET /info_mdix", "GET /info_mdns", "GET /info_udp"};
-
 typedef enum{
 	HTTP_GET_SITE_INIT,
 	HTTP_GET_SITE_TOP,
@@ -27,6 +24,9 @@ typedef enum{
 	HTTP_GET_SITE_HELP
 
 }http_get_site_t;
+
+char* http_get_home[] ={"GET /info_instr", "GET /info_sn", "GET /info_descr", "GET /info_ipv4", "GET /info_netmask",
+					"GET /info_gateway", "GET /info_mac", "GET /info_visa", "GET /info_mdix", "GET /info_mdns", "GET /info_udp"};
 
 typedef enum{
 	HTTP_GET_HOME_INSTR,
@@ -40,8 +40,20 @@ typedef enum{
 	HTTP_GET_HOME_MDIX,
 	HTTP_GET_HOME_MDNS,
 	HTTP_GET_HOME_UDP
-
 }http_get_home_t;
+
+
+char* http_get_setup[] ={"GET /setup_ipv4", "GET /setup_netmask", "GET /setup_gateway", "POST /login"};
+
+typedef enum{
+	HTTP_GET_SETUP_INSTR,
+	HTTP_GET_SETUP_NETMASK,
+	HTTP_GET_SETUP_GATEWAY,
+	HTTP_POST_PASSWORD,
+	HTTP_POST_IP,
+	HTTP_POST_NETMASK,
+	HTTP_POST_GATEWAY
+}http_get_setup_t;
 
 static bool http_load_website(struct netconn *conn, char* buf, u16_t buflen)
 {
@@ -82,29 +94,119 @@ static bool http_load_website(struct netconn *conn, char* buf, u16_t buflen)
 }
 
 
-static err_t http_home_page_send(struct netconn *conn, char* pagedata)
+static err_t http_send(struct netconn *conn, char* pagedata)
 {
 	return netconn_write(conn, (const unsigned char*)pagedata, strlen(pagedata), NETCONN_NOCOPY);
 }
 
-static bool http_home_page(struct netconn *conn, char* buf, u16_t buflen)
+static s32_t http_read_header(char* buf, char* headers[])
 {
-	u32_t size = sizeof(http_get_home)/sizeof(http_get_home[0]);
 	s32_t cmp = -1;
-	bool status = false;
-
-	char pagedata[128];
-	memset(pagedata,0,128);
+	u32_t size = sizeof(headers)/sizeof(headers[0]);
 
 	for(u8_t i = 0; i < size; i++)
 	{
-		if (strncmp((char const *)buf, http_get_home[i], strlen(http_get_home[i]))==0)
+		if (strncmp((char const *)buf, headers[i], strlen(headers[i]))==0)
 		{
 			cmp = i;
 		}
 	}
 
-	switch(cmp)
+	return cmp;
+}
+
+static char* http_post_data(char* buf, u16_t buflen, u16_t* post_data_len)
+{
+	char* post_data_start = strstr(buf, "\r\n\r\n");  // Find the start of POST data
+	if (post_data_start != NULL)
+	{
+	    post_data_start += 4;  // Move past "\r\n\r\n"
+	    *post_data_len = buflen - (post_data_start - buf);
+
+	    return post_data_start;
+	}
+
+	return NULL;
+
+}
+
+static bool http_setup_page(struct netconn *conn, char* buf, u16_t buflen)
+{
+	s32_t header = -1;
+	bool status = false;
+	bool get = false;
+	bool post = false;
+	bool valid_password = false;
+
+	char pagedata[128];
+	memset(pagedata,0,128);
+
+	header = http_read_header(buf, http_get_setup);
+
+	switch(header)
+	{
+		case HTTP_GET_SETUP_INSTR : {
+			get = true;
+			post = false;
+			strcpy(pagedata,"192.168.1.123");
+		}; break;
+
+		case HTTP_GET_SETUP_NETMASK : {
+				get = true;
+				post = false;
+				strcpy(pagedata,"255.255.255.0");
+			}; break;
+
+		case HTTP_GET_SETUP_GATEWAY : {
+			get = true;
+			post = false;
+			strcpy(pagedata,"192.168.1.254");
+		}; break;
+
+		case HTTP_POST_PASSWORD : {
+			char* password ="1234";
+			u16_t post_data_len;
+			char* data = http_post_data(buf, buflen, &post_data_len);
+
+			if(!strncmp(data,password,strlen(password)))
+			{
+				valid_password = true;
+			}
+			else
+			{
+				valid_password = false;
+			}
+
+		}; break;
+
+		default: /* DO NOTHING */; break;
+	}
+
+	if(header >= 0)
+	{
+		if(get)
+		{
+			http_send(conn,pagedata);
+		}
+
+		status = true;
+	}
+
+	return status;
+}
+
+
+static bool http_home_page(struct netconn *conn, char* buf, u16_t buflen)
+{
+	s32_t header = -1;
+	bool status = false;
+
+	char pagedata[128];
+	memset(pagedata,0,128);
+
+	header = http_read_header(buf, http_get_home);
+
+	switch(header)
 	{
 		case HTTP_GET_HOME_INSTR: strcpy(pagedata,"Test device"); break;
 		case HTTP_GET_HOME_SN: strcpy(pagedata,"SN1234"); break;
@@ -121,9 +223,9 @@ static bool http_home_page(struct netconn *conn, char* buf, u16_t buflen)
 		default: /* DO NOTHING */; break;
 	}
 
-	if(cmp >= 0)
+	if(header >= 0)
 	{
-		http_home_page_send(conn,pagedata);
+		http_send(conn,pagedata);
 		status = true;
 	}
 
@@ -150,7 +252,11 @@ static void http_server(struct netconn *conn)
 
 			if(!done)
 			{
-				http_home_page(conn, buf, buflen);
+				done = http_home_page(conn, buf, buflen);
+				if(!done)
+				{
+					http_setup_page(conn, buf, buflen);
+				}
 			}
 
 		}
@@ -160,66 +266,6 @@ static void http_server(struct netconn *conn)
 	netbuf_delete(inbuf);
 }
 
-/*
-static void http_server(struct netconn *conn)
-{
-	struct netbuf *inbuf;
-	err_t recv_err;
-	char* buf;
-	u16_t buflen;
-	struct fs_file file;
-
-	recv_err = netconn_recv(conn, &inbuf);
-
-	if (recv_err == ERR_OK)
-	{
-		if (netconn_err(conn) == ERR_OK)
-		{
-			netbuf_data(inbuf, (void**)&buf, &buflen);
-
-			if (strncmp((char const *)buf, http_get_site[0], strlen(http_get_site[0]))==0)
-			{
-				fs_open(&file, "/index.html");
-				netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-				fs_close(&file);
-			}
-			else if(strncmp((char const *)buf, http_get_site[1], strlen(http_get_site[1]))==0)
-			{
-				fs_open(&file, "/top.html");
-				netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-				fs_close(&file);
-			}
-			else if(strncmp((char const *)buf, http_get_site[2], strlen(http_get_site[2]))==0)
-			{
-				fs_open(&file, "/home.html");
-				netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-				fs_close(&file);
-			}
-			else if(strncmp((char const *)buf, http_get_site[3], strlen(http_get_site[3]))==0)
-			{
-				fs_open(&file, "/configuration.html");
-				netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-				fs_close(&file);
-			}
-			else if(strncmp((char const *)buf, http_get_site[4], strlen(http_get_site[4]))==0)
-			{
-				fs_open(&file, "/support.html");
-				netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-				fs_close(&file);
-			}
-			else if(strncmp((char const *)buf, http_get_site[5], strlen(http_get_site[5]))==0)
-			{
-				fs_open(&file, "/index.html");
-				netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-				fs_close(&file);
-			}
-		}
-	}
-
-	netconn_close(conn);
-	netbuf_delete(inbuf);
-}
-*/
 
 static void http_thread(void *arg)
 {
