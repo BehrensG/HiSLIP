@@ -179,7 +179,7 @@ static bool http_setup_page(struct netconn *conn, char* buf, u16_t buflen)
 			char* password ="1234";
 			char* data = http_post_data(buf, buflen, &post_data_len);
 
-			if(!strncmp(data,password,strlen(password)))
+			if(!strncmp(data, password, strlen(password)) && (post_data_len == strlen(password)))
 			{
 				valid_password = true;
 
