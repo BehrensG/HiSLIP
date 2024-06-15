@@ -8,9 +8,21 @@
 #include "netif.h"
 #include "mdns.h"
 
+const char manufacturer[] = "Manufacurer= ADD TEXT";
+
 #if LWIP_MDNS_RESPONDER
-static void
-srv_txt(struct mdns_service *service, void *txt_userdata)
+
+static void srv_txt(struct mdns_service *service, void *txt_userdata)
+{
+  err_t res;
+  LWIP_UNUSED_ARG(txt_userdata);
+
+  res = mdns_resp_add_service_txtitem(service, "path=/", 6);
+  LWIP_ERROR("mdns add service txt failed\n", (res == ERR_OK), return);
+}
+
+
+static void test_txt(struct mdns_service *service, void *txt_userdata)
 {
   err_t res;
   LWIP_UNUSED_ARG(txt_userdata);
@@ -21,24 +33,30 @@ srv_txt(struct mdns_service *service, void *txt_userdata)
 #endif
 
 #if LWIP_MDNS_RESPONDER
-static void
-mdns_example_report(struct netif* netif, u8_t result)
+
+static void mdns_example_report(struct netif* netif, u8_t result)
 {
   LWIP_PLATFORM_DIAG(("mdns status[netif %d]: %d\n", netif->num, result));
 }
+
 #endif
 
-//extern struct netif gnetif;
-void
-mdns_example_init(void)
+extern struct netif gnetif;
+struct netif *mdns_netif ;
+void MDNS_Init(void)
 {
-	//netif_default = &gnetif ;
-	netif_default->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_IGMP;
+	mdns_netif = &gnetif;
+	mdns_netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_IGMP;
+
 #if LWIP_MDNS_RESPONDER
+
   mdns_resp_register_name_result_cb(mdns_example_report);
   mdns_resp_init();
-  mdns_resp_add_netif(netif_default, "lwip",255);
-  mdns_resp_add_service(netif_default, "hislip0", "_hislip", DNSSD_PROTO_TCP, 4880, 255, srv_txt, NULL);
- // mdns_resp_announce(netif_default);
+  mdns_resp_add_netif(mdns_netif, "mdns_name",255);
+  mdns_resp_add_service(mdns_netif, "web", "_http", DNSSD_PROTO_TCP, 80, 255, srv_txt, NULL);
+  mdns_resp_add_service(mdns_netif, "hislip0", "_hislip", DNSSD_PROTO_TCP, 4880, 255, test_txt, NULL);
+
+ // mdns_resp_announce(mdns_netif);
+
 #endif
 }

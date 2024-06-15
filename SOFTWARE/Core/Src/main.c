@@ -332,17 +332,16 @@ void StartDefaultTask(void const * argument)
   MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
   osDelay(100);
-  mdns_example_init();
+  MDNS_Init();
   hislip_CreateTask();
-  osDelay(100);
   HTTP_CreateTask();
 
   /* Infinite loop */
   for(;;)
   {
-	//  HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
-	  osDelay(100);
-	//  mdns_resp_announce(netif_default);
+	  HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+	  osDelay(500);
+
   }
   /* USER CODE END 5 */
 }
