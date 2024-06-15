@@ -164,7 +164,9 @@
 /*----- Default Value for LWIP_MDNS_RESPONDER: 0 ---*/
 #define LWIP_MDNS_RESPONDER 1
 /*----- Default Value for MDNS_MAX_SERVICES: 0 ---*/
-#define MDNS_MAX_SERVICES 2
+#define MDNS_MAX_SERVICES 3
+/*----- Default Value for MDNS_RESP_USENETIF_EXTCALLBACK: 1 ---*/
+#define MDNS_RESP_USENETIF_EXTCALLBACK 3
 /*----- Value in opt.h for LWIP_STATS: 1 -----*/
 #define LWIP_STATS 0
 /*----- Value in opt.h for CHECKSUM_GEN_IP: 1 -----*/

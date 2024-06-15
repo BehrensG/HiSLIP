@@ -335,7 +335,7 @@ static void http_thread(void *arg)
 
       while(1)
       {
-
+    	 vTaskDelay(pdMS_TO_TICKS(2));
         accept_err = netconn_accept(conn, &newconn);
         if(accept_err == ERR_OK)
         {

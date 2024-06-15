@@ -107,7 +107,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-
+HAL_Delay(100);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -331,7 +331,8 @@ void StartDefaultTask(void const * argument)
   /* init code for LWIP */
   MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
-  osDelay(100);
+
+  osDelay(200);
   MDNS_Init();
   hislip_CreateTask();
   HTTP_CreateTask();

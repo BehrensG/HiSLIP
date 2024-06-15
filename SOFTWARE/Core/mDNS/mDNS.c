@@ -27,7 +27,7 @@ static void test_txt(struct mdns_service *service, void *txt_userdata)
   err_t res;
   LWIP_UNUSED_ARG(txt_userdata);
 
-  res = mdns_resp_add_service_txtitem(service, "path=/", 6);
+  res = mdns_resp_add_service_txtitem(service, manufacturer, strlen(manufacturer));
   LWIP_ERROR("mdns add service txt failed\n", (res == ERR_OK), return);
 }
 #endif
@@ -42,7 +42,9 @@ static void mdns_example_report(struct netif* netif, u8_t result)
 #endif
 
 extern struct netif gnetif;
+
 struct netif *mdns_netif ;
+
 void MDNS_Init(void)
 {
 	mdns_netif = &gnetif;
@@ -52,11 +54,11 @@ void MDNS_Init(void)
 
   mdns_resp_register_name_result_cb(mdns_example_report);
   mdns_resp_init();
-  mdns_resp_add_netif(mdns_netif, "mdns_name",255);
-  mdns_resp_add_service(mdns_netif, "web", "_http", DNSSD_PROTO_TCP, 80, 255, srv_txt, NULL);
-  mdns_resp_add_service(mdns_netif, "hislip0", "_hislip", DNSSD_PROTO_TCP, 4880, 255, test_txt, NULL);
-
- // mdns_resp_announce(mdns_netif);
+  mdns_resp_add_netif(mdns_netif, "mdns_name",5);
+  mdns_resp_add_service(mdns_netif, "web", "_http", DNSSD_PROTO_TCP, 80, 5, srv_txt, NULL);
+  mdns_resp_add_service(mdns_netif, "hislip0", "_hislip", DNSSD_PROTO_TCP, 4880, 5, test_txt, NULL);
+  mdns_resp_add_service(mdns_netif, "spi-raw", "_scpi-raw", DNSSD_PROTO_TCP, 5025, 5, test_txt, NULL);
+  mdns_resp_announce(mdns_netif);
 
 #endif
 }
