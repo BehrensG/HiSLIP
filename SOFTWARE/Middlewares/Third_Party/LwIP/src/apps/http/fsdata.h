@@ -37,7 +37,6 @@
 
 /* THIS FILE IS DEPRECATED AND WILL BE REMOVED IN THE FUTURE */
 /* content was moved to fs.h to simplify #include structure */
-
 extern const struct fsdata_file file_home_html[];
 
 #define FS_ROOT file_home_html

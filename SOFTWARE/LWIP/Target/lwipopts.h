@@ -70,11 +70,11 @@
 /*----- Default Value for H7 devices: 0x30044000 -----*/
 #define LWIP_RAM_HEAP_POINTER 0x30020000
 /*----- Default Value for MEMP_NUM_PBUF: 16 ---*/
-#define MEMP_NUM_PBUF 100
+#define MEMP_NUM_PBUF 20
 /*----- Default Value for MEMP_NUM_RAW_PCB: 4 ---*/
 #define MEMP_NUM_RAW_PCB 20
 /*----- Default Value for MEMP_NUM_TCP_PCB_LISTEN: 8 ---*/
-#define MEMP_NUM_TCP_PCB_LISTEN 100
+#define MEMP_NUM_TCP_PCB_LISTEN 20
 /*----- Default Value for MEMP_NUM_TCP_SEG: 16 ---*/
 #define MEMP_NUM_TCP_SEG 20
 /*----- Default Value for MEMP_NUM_NETBUF: 2 ---*/
@@ -111,6 +111,8 @@
 #define TCP_SND_QUEUELEN 16
 /*----- Default Value for LWIP_NETIF_HOSTNAME: 0 ---*/
 #define LWIP_NETIF_HOSTNAME 1
+/*----- Default Value for LWIP_NETIF_EXT_STATUS_CALLBACK: 0 ---*/
+#define LWIP_NETIF_EXT_STATUS_CALLBACK 1
 /*----- Value in opt.h for LWIP_NETIF_LINK_CALLBACK: 0 -----*/
 #define LWIP_NETIF_LINK_CALLBACK 1
 /*----- Default Value for LWIP_NUM_NETIF_CLIENT_DATA: 0 ---*/
@@ -159,6 +161,10 @@
 #define LWIP_HTTPD_POST_MAX_RESPONSE_URI_LEN 256
 /*----- Default Value for LWIP_MDNS: 0 ---*/
 #define LWIP_MDNS 1
+/*----- Default Value for LWIP_MDNS_RESPONDER: 0 ---*/
+#define LWIP_MDNS_RESPONDER 1
+/*----- Default Value for MDNS_MAX_SERVICES: 0 ---*/
+#define MDNS_MAX_SERVICES 1
 /*----- Value in opt.h for LWIP_STATS: 1 -----*/
 #define LWIP_STATS 0
 /*----- Value in opt.h for CHECKSUM_GEN_IP: 1 -----*/
@@ -181,9 +187,6 @@
 /* USER CODE BEGIN 1 */
 #define LWIP_SO_RCVTIMEO	0
 #define MEMP_NUM_NETCONN    20
-
-//#define LWIP_MULTICAST_PING            1
-#define LWIP_MDNS_RESPONDER            1
 /* USER CODE END 1 */
 
 #ifdef __cplusplus
