@@ -41,24 +41,22 @@ static void mdns_example_report(struct netif* netif, u8_t result)
 
 #endif
 
-extern struct netif gnetif;
-
-struct netif *mdns_netif ;
 
 void MDNS_Init(void)
 {
-	mdns_netif = &gnetif;
-	mdns_netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_IGMP;
+
+	netif_default->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_IGMP;
 
 #if LWIP_MDNS_RESPONDER
 
   mdns_resp_register_name_result_cb(mdns_example_report);
   mdns_resp_init();
-  mdns_resp_add_netif(mdns_netif, "mdns_name",5);
-  mdns_resp_add_service(mdns_netif, "web", "_http", DNSSD_PROTO_TCP, 80, 5, srv_txt, NULL);
-  mdns_resp_add_service(mdns_netif, "hislip0", "_hislip", DNSSD_PROTO_TCP, 4880, 5, test_txt, NULL);
-  mdns_resp_add_service(mdns_netif, "spi-raw", "_scpi-raw", DNSSD_PROTO_TCP, 5025, 5, test_txt, NULL);
-  mdns_resp_announce(mdns_netif);
+  mdns_resp_add_netif(netif_default, "mdns_name",0xFFFFFFFF);
+  mdns_resp_add_service(netif_default, "web", "_http", DNSSD_PROTO_TCP, 80, 0xFFFFFFFF, srv_txt, NULL);
+  mdns_resp_add_service(netif_default, "hislip0", "_hislip", DNSSD_PROTO_TCP, 4880, 0xFFFFFFFF, test_txt, NULL);
+  mdns_resp_add_service(netif_default, "spi-raw", "_scpi-raw", DNSSD_PROTO_TCP, 5025, 0xFFFFFFFF, test_txt, NULL);
+
+  mdns_resp_announce(netif_default);
 
 #endif
 }

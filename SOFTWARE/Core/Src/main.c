@@ -333,10 +333,10 @@ void StartDefaultTask(void const * argument)
   /* USER CODE BEGIN 5 */
 
   osDelay(200);
-  MDNS_Init();
+
   hislip_CreateTask();
   HTTP_CreateTask();
-
+  MDNS_Init();
   /* Infinite loop */
   for(;;)
   {
