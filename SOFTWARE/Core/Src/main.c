@@ -45,7 +45,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 osThreadId defaultTaskHandle;
-uint32_t defaultTaskBuffer[ 512 ];
+uint32_t defaultTaskBuffer[ 1024 ];
 osStaticThreadDef_t defaultTaskControlBlock;
 /* USER CODE BEGIN PV */
 
@@ -63,7 +63,13 @@ void StartDefaultTask(void const * argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+static void nop_delay()
+{
+	for(uint32_t i = 0; i < 5000000; i++)
+	{
+		__NOP();
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -74,7 +80,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+	nop_delay();
   /* USER CODE END 1 */
 
   /* MPU Configuration--------------------------------------------------------*/
@@ -107,7 +113,6 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-HAL_Delay(100);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -128,7 +133,7 @@ HAL_Delay(100);
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 512, defaultTaskBuffer, &defaultTaskControlBlock);
+  osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 1024, defaultTaskBuffer, &defaultTaskControlBlock);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -329,20 +334,23 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void const * argument)
 {
   /* init code for LWIP */
+
   MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
 
-  osDelay(200);
+  osDelay(100);
 
   hislip_CreateTask();
   HTTP_CreateTask();
   MDNS_Init();
+
+ //UDP_CreateTask();
   /* Infinite loop */
   for(;;)
   {
 	  HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
 	  osDelay(500);
-
+	//  mdns_resp_announce(netif_default);
   }
   /* USER CODE END 5 */
 }

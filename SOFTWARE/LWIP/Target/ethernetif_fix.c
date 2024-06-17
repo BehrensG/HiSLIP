@@ -257,7 +257,7 @@ static void low_level_init(struct netif *netif)
   #else
     netif->flags |= NETIF_FLAG_BROADCAST;
   #endif /* LWIP_ARP */
-
+    netif->flags |= NETIF_FLAG_IGMP;
   /* create a binary semaphore used for informing ethernetif of frame reception */
   osSemaphoreDef(RxSem);
   RxPktSemaphore = osSemaphoreCreate(osSemaphore(RxSem), 1);
@@ -326,28 +326,20 @@ static void low_level_init(struct netif *netif)
     MACConf.DuplexMode = duplex;
     MACConf.Speed = speed;
     HAL_ETH_SetMACConfig(&heth, &MACConf);
-    ETH_MACFilterConfigTypeDef FilterConfig;
 
-    HAL_ETH_GetMACFilterConfig(&heth,&FilterConfig);
-    FilterConfig.PromiscuousMode = 1;
-    FilterConfig.HashUnicast = 0;
-    FilterConfig.HashMulticast = 0;
-    FilterConfig.DestAddrInverseFiltering = 0;
-    FilterConfig.PassAllMulticast = 0;
-    FilterConfig.BroadcastFilter = 1;
-    FilterConfig.ControlPacketsFilter = 0x03;
-    FilterConfig.SrcAddrInverseFiltering = 0;
-    FilterConfig.SrcAddrFiltering = 0;
-    FilterConfig.HachOrPerfectFilter = 0;
-    FilterConfig.ReceiveAllMode = 1;
-    HAL_ETH_SetMACFilterConfig(&heth,&FilterConfig);
 
     HAL_ETH_Start_IT(&heth);
     netif_set_up(netif);
     netif_set_link_up(netif);
 
 /* USER CODE BEGIN PHY_POST_CONFIG */
+    ETH_MACFilterConfigTypeDef FilterConfig;
 
+    HAL_ETH_GetMACFilterConfig(&heth,&FilterConfig);
+    FilterConfig.PromiscuousMode = 1;
+    FilterConfig.PassAllMulticast = 1;
+
+    HAL_ETH_SetMACFilterConfig(&heth,&FilterConfig);
 /* USER CODE END PHY_POST_CONFIG */
     }
 
