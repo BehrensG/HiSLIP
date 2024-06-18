@@ -11,6 +11,201 @@
 #include "lwip/apps/fs.h"
 #include "api.h"
 
+
+
+char http_get_lxi_ident[] = "GET /lxi/identification";
+
+static const char manufacturer[] = "Test name";
+static const char model[] = "ABC1234";
+static const char sn[] = "SN00001";
+static const char firmware[] = "12.131.31";
+static const char manufacturer_description[] = "Sample device";
+static const char ipv4_address[] = "192.168.1.4";
+static const char ipv4_netmask[] = "255.255.255.0";
+static const char ipv4_gateway[] = "192.168.1.1";
+static const char mac[]="00-80-41-ae-fd-7e";
+
+
+#define PAGE_BODY_SIZE	2048
+#define FORMATED_SIZE	256
+#define HEADER_SIZE		128
+
+
+static err_t http_dynamic_web_page(struct netconn *conn)
+{
+
+	err_t err;
+
+
+	char HTTP_HEADER[HEADER_SIZE];
+	char PAGE_BODY[PAGE_BODY_SIZE];
+	char formated[FORMATED_SIZE];
+
+	memset(PAGE_BODY, 0, PAGE_BODY_SIZE);
+	memset(HTTP_HEADER, 0, HEADER_SIZE);
+
+
+	strcat((char *)PAGE_BODY, "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+	strcat((char *)PAGE_BODY, "<LXIDevice xmlns=\"http://www.lxistandard.org/InstrumentIdentification/1.0\""
+								" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.lxistandard.org/InstrumentIdentification/1.0 LXIIdentification.xsd\">\r\n");
+
+
+		// Manufacturer
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<Manufacturer>%s</Manufacturer>\r\n",manufacturer);
+		strcat((char *)PAGE_BODY, formated);
+
+		// Model
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<Model>%s</Model>\r\n",model);
+		strcat((char *)PAGE_BODY, formated);
+
+		// SerialNumber
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<SerialNumber>%s</SerialNumber>\r\n",sn);
+		strcat((char *)PAGE_BODY, formated);
+
+		// FirmwareRevision
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<FirmwareRevision>%s</FirmwareRevision>\r\n",firmware);
+		strcat((char *)PAGE_BODY, formated);
+
+		// ManufacturerDescription
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<ManufacturerDescription>%s</ManufacturerDescription>\r\n",manufacturer_description);
+		strcat((char *)PAGE_BODY, formated);
+
+		// HomepageURL
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<HomepageURL></HomepageURL>\r\n");
+		strcat((char *)PAGE_BODY, formated);
+
+		// DriverURL
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<DriverURL></DriverURL>\r\n");
+		strcat((char *)PAGE_BODY, formated);
+
+		// UserDescription
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<UserDescription></UserDescription>\r\n");
+		strcat((char *)PAGE_BODY, formated);
+
+		// IdentificationURL
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<IdentificationURL>%s/lxi/identification</IdentificationURL>\r\n",ipv4_address);
+		strcat((char *)PAGE_BODY, formated);
+
+		// Interface
+		strcat((char *)PAGE_BODY, "<Interface xsi:type=\"NetworkInformation\" InterfaceType=\"LXI\" IPType=\"IPv4\">\r\n");
+
+			// InstrumentAddressString SOCKET
+			memset(formated,0, FORMATED_SIZE);
+			sprintf(formated, "<InstrumentAddressString>TCPIP::%s::5025::SOCKET</InstrumentAddressString>\r\n",ipv4_address);
+			strcat((char *)PAGE_BODY, formated);
+
+			// InstrumentAddressString HISLIP
+			memset(formated,0, FORMATED_SIZE);
+			sprintf(formated, "<InstrumentAddressString>TCPIP::%s::hislip0::INSTR</InstrumentAddressString>\r\n",ipv4_address);
+			strcat((char *)PAGE_BODY, formated);
+
+			// Hostname
+			memset(formated,0, FORMATED_SIZE);
+			sprintf(formated, "<Hostname></Hostname>\r\n");
+			strcat((char *)PAGE_BODY, formated);
+
+			// IPAddress
+			memset(formated,0, FORMATED_SIZE);
+			sprintf(formated, "<IPAddress>%s</IPAddress>\r\n",ipv4_address);
+			strcat((char *)PAGE_BODY, formated);
+
+			// SubnetMask
+			memset(formated,0, FORMATED_SIZE);
+			sprintf(formated, "<SubnetMask>%s</SubnetMask>\r\n",ipv4_netmask);
+			strcat((char *)PAGE_BODY, formated);
+
+			// MACAddress
+			memset(formated,0, FORMATED_SIZE);
+			sprintf(formated, "<MACAddress>%s</MACAddress>\r\n",mac);
+			strcat((char *)PAGE_BODY, formated);
+
+			// Gateway
+			memset(formated,0, FORMATED_SIZE);
+			sprintf(formated, "<Gateway>%s</Gateway>\r\n",ipv4_gateway);
+			strcat((char *)PAGE_BODY, formated);
+
+			// DHCPEnabled
+			memset(formated,0, FORMATED_SIZE);
+			sprintf(formated, "<DHCPEnabled>false</DHCPEnabled>\r\n");
+			strcat((char *)PAGE_BODY, formated);
+
+			// AutoIPEnabled
+			memset(formated,0, FORMATED_SIZE);
+			sprintf(formated, "<AutoIPEnabled>false</AutoIPEnabled>\r\n");
+			strcat((char *)PAGE_BODY, formated);
+
+		// Interface
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "</Interface>\r\n");
+		strcat((char *)PAGE_BODY, formated);
+
+		// IVISoftwareModuleName
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<IVISoftwareModuleName>unknown</IVISoftwareModuleName>\r\n");
+		strcat((char *)PAGE_BODY, formated);
+
+		// LXIVersion
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<LXIVersion>1.4</LXIVersion>\r\n");
+		strcat((char *)PAGE_BODY, formated);
+
+		// LXIExtendedFunctions
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "<LXIExtendedFunctions>\r\n");
+		strcat((char *)PAGE_BODY, formated);
+
+			// Function
+			memset(formated,0, FORMATED_SIZE);
+			sprintf(formated, "<Function FunctionName=\"LXI HiSLIP\" Version=\"1.0\"></Function>");
+			strcat((char *)PAGE_BODY, formated);
+
+		// LXIExtendedFunctions
+		memset(formated,0, FORMATED_SIZE);
+		sprintf(formated, "</LXIExtendedFunctions>\r\n");
+		strcat((char *)PAGE_BODY, formated);
+
+	// LXIDevice
+	memset(formated,0, FORMATED_SIZE);
+	sprintf(formated, "</LXIDevice>\r\n");
+	strcat((char *)PAGE_BODY, formated);
+
+
+
+	sprintf(HTTP_HEADER,"HTTP/1.1 200 OK\r\n"
+    "Content-Type: text/xml\r\n"
+    "Content-Length: %d\r\n\r\n",strlen(PAGE_BODY));
+
+	err = netconn_write(conn, HTTP_HEADER, strlen(HTTP_HEADER), NETCONN_NOCOPY);
+	err = netconn_write(conn, PAGE_BODY, strlen(PAGE_BODY), NETCONN_NOCOPY);
+
+	return err;
+}
+
+static bool http_lxi_identification(struct netconn *conn, char* buf, u16_t buflen)
+{
+	if (strncmp((char const *)buf, http_get_lxi_ident, strlen(http_get_lxi_ident))==0)
+	{
+		http_dynamic_web_page(conn);
+
+		return true;
+
+	}
+
+	return false;
+}
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------
+
 char* http_get_site[] = {"GET / HTTP/1.1", "GET /top.html", "GET /home.html", "GET /setup.html",
 						"GET /support.html", "GET /index.html", "GET /help.html"};
 
@@ -24,25 +219,6 @@ typedef enum{
 	HTTP_GET_SITE_HELP
 
 }http_get_site_t;
-
-char* http_get_home[] ={"GET /info_instr", "GET /info_sn", "GET /info_descr", "GET /info_ipv4", "GET /info_netmask",
-					"GET /info_gateway", "GET /info_mac", "GET /info_visa", "GET /info_mdix", "GET /info_mdns", "GET /info_udp"};
-
-typedef enum{
-	HTTP_GET_HOME_INSTR,
-	HTTP_GET_HOME_SN,
-	HTTP_GET_HOME_DESCR,
-	HTTP_GET_HOME_IPV4,
-	HTTP_GET_HOME_NETMASK,
-	HTTP_GET_HOME_GATEWAY,
-	HTTP_GET_HOME_MAC,
-	HTTP_GET_HOME_VISA,
-	HTTP_GET_HOME_MDIX,
-	HTTP_GET_HOME_MDNS,
-	HTTP_GET_HOME_UDP
-}http_get_home_t;
-
-
 
 static bool http_load_website(struct netconn *conn, char* buf, u16_t buflen)
 {
@@ -118,6 +294,7 @@ static char* http_post_data(char* buf, u16_t buflen, u16_t* post_data_len)
 
 }
 
+// ----------------------------------------------------------------------------------------------------------------------------------
 
 char* http_get_setup[] ={"GET /setup_ipv4", "GET /setup_netmask", "GET /setup_gateway", "POST /login", "GET /login_status",
 						"POST /setup_ipv4", "POST /setup_netmask", "POST /setup_gateway"};
@@ -243,6 +420,24 @@ static bool http_setup_page(struct netconn *conn, char* buf, u16_t buflen)
 	return status;
 }
 
+// ----------------------------------------------------------------------------------------------------------------------------------
+
+char* http_get_home[] ={"GET /info_instr", "GET /info_sn", "GET /info_descr", "GET /info_ipv4", "GET /info_netmask",
+					"GET /info_gateway", "GET /info_mac", "GET /info_visa", "GET /info_mdix", "GET /info_mdns", "GET /info_udp"};
+
+typedef enum{
+	HTTP_GET_HOME_INSTR,
+	HTTP_GET_HOME_SN,
+	HTTP_GET_HOME_DESCR,
+	HTTP_GET_HOME_IPV4,
+	HTTP_GET_HOME_NETMASK,
+	HTTP_GET_HOME_GATEWAY,
+	HTTP_GET_HOME_MAC,
+	HTTP_GET_HOME_VISA,
+	HTTP_GET_HOME_MDIX,
+	HTTP_GET_HOME_MDNS,
+	HTTP_GET_HOME_UDP
+}http_get_home_t;
 
 static bool http_home_page(struct netconn *conn, char* buf, u16_t buflen)
 {
@@ -288,6 +483,7 @@ static void http_server(struct netconn *conn)
 	char* buf;
 	u16_t buflen;
 	bool done = false;
+
 	recv_err = netconn_recv(conn, &inbuf);
 
 	if (recv_err == ERR_OK)
@@ -296,15 +492,32 @@ static void http_server(struct netconn *conn)
 		{
 			netbuf_data(inbuf, (void**)&buf, &buflen);
 
-			done = http_load_website(conn, buf, buflen);
+			if(!done)
+			{
+				done = http_setup_page(conn, buf, buflen);
+			}
+
+
+			if(!done)
+			{
+				done = http_load_website(conn, buf, buflen);
+			}
 
 			if(!done)
 			{
 				done = http_home_page(conn, buf, buflen);
-				if(!done)
-				{
-					http_setup_page(conn, buf, buflen);
-				}
+
+			}
+
+			if(!done)
+			{
+				done = http_setup_page(conn, buf, buflen);
+
+			}
+
+			if(!done)
+			{
+				done = http_lxi_identification(conn, buf, buflen);
 			}
 
 		}
@@ -314,6 +527,7 @@ static void http_server(struct netconn *conn)
 	netbuf_delete(inbuf);
 }
 
+// ----------------------------------------------------------------------------------------------------------------------------------
 
 static void http_thread(void *arg)
 {
@@ -341,7 +555,6 @@ static void http_thread(void *arg)
         {
 
           http_server(newconn);
-
           netconn_delete(newconn);
         }
       }
