@@ -8,7 +8,10 @@
 #include "netif.h"
 #include "mdns.h"
 
-const char manufacturer[] = "Manufacurer= ADD TEXT";
+const char manufacturer[] = "Manufacurer=GB";
+const char model[] = "Model=ABC1234T";
+const char sn[] = "SerialNumber=A1313432";
+const char firmver[] = "FirmwareVersion=1.321.13";
 
 #if LWIP_MDNS_RESPONDER
 
@@ -28,6 +31,9 @@ static void test_txt(struct mdns_service *service, void *txt_userdata)
   LWIP_UNUSED_ARG(txt_userdata);
 
   res = mdns_resp_add_service_txtitem(service, manufacturer, strlen(manufacturer));
+  res = mdns_resp_add_service_txtitem(service, model, strlen(model));
+  res = mdns_resp_add_service_txtitem(service, sn, strlen(sn));
+  res = mdns_resp_add_service_txtitem(service, firmver, strlen(firmver));
   LWIP_ERROR("mdns add service txt failed\n", (res == ERR_OK), return);
 }
 #endif
@@ -53,8 +59,8 @@ ip4_addr_t groupaddr;
   mdns_resp_init();
   mdns_resp_add_netif(netif_default, "mdns_name",20);
   mdns_resp_add_service(netif_default, "web", "_http", DNSSD_PROTO_TCP, 80, 20, srv_txt, NULL);
-  mdns_resp_add_service(netif_default, "hislip0", "_hislip", DNSSD_PROTO_TCP, 4880, 20, test_txt, NULL);
-  mdns_resp_add_service(netif_default, "spi-raw", "_scpi-raw", DNSSD_PROTO_TCP, 5025, 20, test_txt, NULL);
+  mdns_resp_add_service(netif_default, "Device", "_lxi", DNSSD_PROTO_TCP, 4880, 20, test_txt, NULL);
+  mdns_resp_add_service(netif_default, "spi-raw", "_scpi-raw", DNSSD_PROTO_TCP, 5025, 20, NULL, NULL);
 
   mdns_resp_announce(netif_default);
 
